@@ -105,6 +105,28 @@ not only a plan:
 Good moments to do this: anything that felt uncertain while it was being
 built, and before a spec's PR comes out of draft and merges.
 
+## When multiple findings surface at once
+
+A subagent review, or a spec close-out pass, often surfaces several
+things together — some routine-but-real, some genuinely needing the
+person's own attestation, some hitting an actual escalation trigger.
+Don't bundle all of it into one "come back and sort through this"
+conversation just because it surfaced at the same time. Before bringing
+anything to the person:
+
+- Resolve every routine-but-real item first, inside Claude Code, via
+  Plan Mode and the subagent — same as any other task, regardless of
+  whether it happened to surface alongside something that does need
+  the person.
+- Separate what's left into two categories: things only the person can
+  attest to (behavior they'd have to actually use the app to confirm —
+  not determinable from the test suite or a diff), and things that hit
+  one of the two escalation triggers.
+- Bring only those two categories to chat, and say plainly which is
+  which. A person's attention during an attestation pass shouldn't also
+  get spent re-litigating a design-polish call that could have been
+  settled without them.
+
 ## What "good" looks like over time
 
 This workflow is working if: routine tasks move through Claude Code

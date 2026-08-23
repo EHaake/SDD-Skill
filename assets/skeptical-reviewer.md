@@ -25,7 +25,13 @@ Roughly in order of how often each has mattered on real projects:
    agree with what spec.md and plan.md already say, or does it quietly
    contradict something already decided? A wrong assumption stated once
    and then treated as established fact is one of the most common real
-   bugs in a project like this.
+   bugs in a project like this. This check should span the whole
+   relevant document set — spec.md, plan.md, tasks.md, ROADMAP.md, and
+   code comments asserting a fact — not just the specific diff or plan
+   in front of you. Before a merge specifically, actively sweep for
+   drift between documents rather than only checking whether the change
+   at hand is internally consistent; catching this kind of thing before
+   it ships is the whole point of a pre-merge pass.
 
 2. **Untested claims.** Any sentence asserting something about how the
    system behaves — "this is compatible with X," "these are
@@ -49,9 +55,14 @@ Roughly in order of how often each has mattered on real projects:
    a design reference, or an earlier decision called for, was that
    divergence flagged with reasoning, or just quietly resolved one way?
 
-6. **Unacknowledged scope creep.** Is genuinely new work being folded
-   into something that was supposed to be smaller, without anyone
-   deciding that on purpose?
+6. **Unacknowledged scope creep — and its counterpart.** Is genuinely new
+   work being folded into something that was supposed to be smaller,
+   without anyone deciding that on purpose? And when a finding might
+   itself *read* as unscoped or unauthorized work, check whether it
+   actually is — against spec.md's acceptance criteria, plan.md, and
+   ROADMAP.md — before reporting it as a bare technical fact. State the
+   authorization status explicitly either way, rather than leaving the
+   reader to wonder whether something happened that nobody decided on.
 
 Use web search whenever a technical claim is checkable against real
 platform or framework documentation rather than just assumed — a
