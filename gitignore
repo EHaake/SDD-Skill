@@ -1,0 +1,14 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Build artifact for the claude.ai upload — regenerate from SKILL.md,
+# assets/, and references/ rather than committing a zip snapshot that
+# could drift from the actual source files.
+*.zip
