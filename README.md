@@ -3,7 +3,10 @@
 The version-controlled source for the `spec-driven-development` Claude
 Skill — the process knowledge (not any one project's content) that
 governs how spec-driven development gets run with Claude, Claude Code,
-and Claude Design.
+and Claude Design. New to spec-driven development, or wondering why
+you'd want it? [`SDD-Template`](https://github.com/EHaake/SDD-Template)'s
+README has the full overview — this one assumes that's already decided
+and covers getting the skill itself installed and kept current.
 
 **This repo is not itself read by Claude Code or claude.ai.** It's the
 place changes get made and history gets kept; the skill only actually
@@ -71,7 +74,8 @@ repo having the fix doesn't mean either installed copy has it yet.
 
 ## The companion repo
 
-`SDD-template` is the project-scaffold counterpart — a GitHub template
+**[`SDD-Template`](https://github.com/EHaake/SDD-Template)** is the
+project-scaffold counterpart — a GitHub template
 repo (the actual "Template repository" feature) that seeds a new
 project's `CLAUDE.md`/`spec.md`/`plan.md`/`tasks.md`/`brief.md`. This
 repo and that one are deliberately separate: this one is the
