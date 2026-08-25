@@ -23,6 +23,17 @@ takes precedence over the user-level one for that project only.
 
 ## The per-task loop
 
+**On cadence, stated plainly up front**: the subagent isn't invoked on a
+fixed schedule — not every task, not automatically at the end of every
+phase. It's driven by the nature of each decision, per task (Step 1
+below), which could mean zero invocations in an all-mechanical phase or
+several in a decision-heavy one. Layered on top of that per-decision
+trigger is one recurring checkpoint that *is* close to a hard rule:
+before a spec's PR comes out of draft and merges (see "After
+implementation" below) — a whole-spec consistency sweep, not tied to
+any single task. Routine work should never see the subagent at all;
+that's the point of Step 1 existing.
+
 ### Step 1 — Is this routine?
 
 Before Claude Code starts on a task, ask whether it's well-specified and
