@@ -52,6 +52,19 @@ to Step 2:
 - Would be expensive to unwind if it turns out wrong — not a five-minute
   fix.
 
+**A task can trip the surface of one of these and still correctly be
+routine, if the actual judgment call was already discharged upstream** —
+in an approved `plan.md` section, or in an earlier review round — and
+what remains at execution is genuine transcription into code, not an
+open decision. The test is whether a real, undischarged judgment call
+remains at the moment of execution, not whether the topic sounds
+architecturally significant. A whole phase reading as "all routine" can
+be the success condition of good upfront planning, not evidence the
+triage is being skipped — but that's only true if the hard parts were
+genuinely settled earlier, not merely unexamined now. Worth being able
+to point to *where* a given decision was actually made, not just assert
+that it was.
+
 ### Step 2 — Use Plan Mode
 
 Activate Plan Mode (`Shift+Tab` twice, or `/plan`) before letting Claude
