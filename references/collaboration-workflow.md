@@ -91,7 +91,12 @@ plenty that feel weighty in the moment) → invoke the subagent, resolve
 within the same session:
 
 > "Before I approve this, have the skeptical-reviewer check this plan
-> against CLAUDE.md and the current spec/plan."
+> against CLAUDE.md and specs/004-search/spec.md and plan.md."
+
+The subagent starts cold: it sees the invocation prompt, CLAUDE.md,
+and a git status snapshot — nothing else from the session. Name the
+spec directory and the specific artifact under review in the prompt;
+it can't infer them from a conversation it never saw.
 
 Read its findings. If it flags something real, discuss with the main
 Claude Code session, revise, and optionally re-review. If it comes back
@@ -123,11 +128,53 @@ conservatively.
 The subagent is equally useful pointed at something already built,
 not only a plan:
 
-> "Have the skeptical-reviewer check the last commit's claims against
-> what actually got tested."
+> "Have the skeptical-reviewer check this commit's claims against what
+> actually got tested. The diff is in scratch/review-input.diff."
+
+One mechanical constraint: the reviewer has no Bash, deliberately —
+its read-only design is the point — so it cannot run `git diff`,
+`git show`, or `git log` itself. When a review concerns a commit or a
+diff, the invoking session must supply it: paste the diff into the
+invocation prompt, or write it to a file and name that file. Without
+that, the reviewer can only see the current state of the files, not
+the change.
 
 Good moments to do this: anything that felt uncertain while it was being
-built, and before a spec's PR comes out of draft and merges.
+built, and before a spec's PR comes out of draft and merges. For that
+pre-merge pass, say so explicitly, so the whole-spec sweep happens on
+purpose rather than as a guess about scope:
+
+> "This is the pre-merge whole-spec sweep for specs/004-search. Have
+> the skeptical-reviewer sweep spec.md, plan.md, tasks.md, ROADMAP.md,
+> and DECISIONS.md for drift before this merges."
+
+## Recording what a review decided
+
+After acting on a review's findings, record each real decision in the
+document it belongs to: a plan.md entry for a technical decision
+(plan.md is a living record — this is exactly the content it exists
+for), a spec.md correction if behavior was mis-stated, a CLAUDE.md
+principle if the lesson generalizes, or a DECISIONS.md entry for
+business or process context. Include a line on why it was resolved
+that way, and reuse the review's own severity labels (blocking /
+second look / solid) so the record and the reviews speak the same
+language. This is what makes a discharged judgment call citable later
+— Step 1's triage can point at where a decision was actually made
+instead of just asserting that it was.
+
+Record findings and resolutions, never coverage. A "reviewed on this
+date, found clean" marker is a suppression list waiting to happen: the
+sweep part of a review is drift detection, and any later change can
+put two documents that agreed at the last review into contradiction —
+a past clean verdict says nothing about the present. For the same
+reason, never paste a previous review's verdict into a new reviewer
+invocation. A fresh reviewer that starts from its predecessor's
+agreement is anchored on exactly the failure mode it exists to catch;
+give it the current documents and the current question, nothing else.
+
+The main session does this writing, not the reviewer — the reviewer
+has no write access, and that's part of its design, not a gap to work
+around.
 
 ## When multiple findings surface at once
 
