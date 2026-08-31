@@ -143,6 +143,16 @@ spec, sized to be reviewable on its own.
   `tasks.md` is done and verified — not when it "looks done." Merging
   partway through, even with good intentions, defeats the point of
   scoping a spec as one coherent unit.
+- Marking ready also has a close-out step: update `ROADMAP.md` (drop
+  or annotate what the spec shipped, add follow-ups it surfaced) and
+  the repo README (if user-facing behavior or setup changed), then run
+  the pre-merge review sweep so it verifies those updates rather than
+  pre-dates them. These two files go stale precisely because nothing
+  else forces them — no task references them, no test fails when they
+  lag — so the check lives here at the merge gate, and as a standing
+  final task in `tasks.md` (see the tasks template). README changes
+  describing the spec's behavior ride the spec branch; `ROADMAP.md`
+  commits straight to `main` per the rule below.
 - Repo-wide files (`CLAUDE.md`, `ROADMAP.md`, `DECISIONS.md`) commit
   straight to `main`. Spec-specific files commit to that spec's branch
   and ride into `main` only when the spec merges. Getting this backwards

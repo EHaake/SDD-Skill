@@ -47,6 +47,20 @@ rather than per-task — a wrong view or a wrong CRUD field is cheap to
 fix after the fact. Re-tighten around anything that turns out to be a
 genuine judgment call, even mid-phase. -->
 
+## Final phase — Spec close-out
+
+<!-- Keep this phase in every real tasks.md. Merge is gated on every
+task being checked, which makes this checkbox the enforcement mechanism
+for updates nothing else forces — no other task references these files,
+and no test fails when they go stale. -->
+
+- [ ] **T0XX** — Update `ROADMAP.md` (drop or annotate what this spec
+  shipped; add any follow-ups it surfaced) and the repo README if
+  user-facing behavior or setup changed. Then request the pre-merge
+  whole-spec sweep. *Verify: ROADMAP.md no longer lists this spec's
+  work as future; README matches actual behavior; the sweep came back
+  clean or its findings were resolved.*
+
 ---
 
 ## Handoff note

@@ -141,12 +141,16 @@ the change.
 
 Good moments to do this: anything that felt uncertain while it was being
 built, and before a spec's PR comes out of draft and merges. For that
-pre-merge pass, say so explicitly, so the whole-spec sweep happens on
-purpose rather than as a guess about scope:
+pre-merge pass, the close-out edits come first — update ROADMAP.md and
+the repo README (per the constitution's close-out step) *before*
+invoking the sweep, so the sweep verifies the close-out instead of
+pre-dating it. Then say explicitly that this is the pre-merge pass, so
+the whole-spec sweep happens on purpose rather than as a guess about
+scope:
 
 > "This is the pre-merge whole-spec sweep for specs/004-search. Have
 > the skeptical-reviewer sweep spec.md, plan.md, tasks.md, ROADMAP.md,
-> and DECISIONS.md for drift before this merges."
+> DECISIONS.md, and the README for drift before this merges."
 
 ## Recording what a review decided
 

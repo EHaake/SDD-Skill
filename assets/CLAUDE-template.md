@@ -97,11 +97,18 @@ delete a test to make it pass — if a test seems wrong, flag it and ask.
 ## Git conventions
 
 - **One branch per spec, not per task or phase.**
-- **Never commit directly to `main`.** All implementation work happens
-  on a spec branch.
+- **Never commit implementation work directly to `main`.** All code
+  changes happen on a spec branch. Repo-wide docs (`CLAUDE.md`,
+  `ROADMAP.md`, `DECISIONS.md`) are the exception: they commit straight
+  to `main`, while spec-specific files ride the spec branch.
 - Open the PR as a draft immediately after pushing the branch, for a
   running diff. Only mark it ready and merge once every task in the
   spec's `tasks.md` is complete and verified.
+- Marking ready has a close-out step, before any pre-merge review
+  sweep: update `ROADMAP.md` (drop or annotate what this spec shipped,
+  add follow-ups it surfaced) and the README if user-facing behavior
+  or setup changed. README changes describing this spec's behavior
+  ride the spec branch.
 - Keep AI co-authorship attribution on commits — accurate, and worth
   keeping for a project meant to demonstrate this workflow.
 - Never force-push.

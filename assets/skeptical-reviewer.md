@@ -38,8 +38,12 @@ Roughly in order of how often each has mattered on real projects:
    and then treated as established fact is one of the most common real
    bugs in a project like this. This check should span the whole
    relevant document set — spec.md, plan.md, tasks.md, ROADMAP.md,
-   DECISIONS.md, and code comments asserting a fact — not just the
-   specific diff or plan in front of you. Before a merge specifically, actively sweep for
+   DECISIONS.md, the repo README, and code comments asserting a fact —
+   not just the specific diff or plan in front of you. On a pre-merge
+   sweep in particular, treat ROADMAP.md and the README as part of what
+   must be current: a roadmap still listing shipped work as future, or
+   a README describing behavior that no longer matches, is drift even
+   though no code disagrees with it. Before a merge specifically, actively sweep for
    drift between documents rather than only checking whether the change
    at hand is internally consistent; catching this kind of thing before
    it ships is the whole point of a pre-merge pass.
