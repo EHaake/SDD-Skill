@@ -27,8 +27,12 @@ resume cold than one that doesn't.
 
 - **Claude (chat)** is the planning partner — narrowing scope, resolving
   ambiguity, arguing about a design decision, asking the question that
-  saves a rewrite later. This is cheap, fast iteration; use it before
-  code exists, not after.
+  saves a rewrite later. This is cheap, fast iteration for the *what
+  and why* — the idea, the constitution, every `spec.md` — none of
+  which needs repo access to think well. Early in a project it also
+  authors `plan.md` and `tasks.md`; once the project has shipped code,
+  that authorship moves to Claude Code (see "Who authors plan.md and
+  tasks.md" below).
 - **Claude Design** (if the project has a UI) produces visual references
   — screens, a token system, a written brief — not literal source code
   for a native app. Its output is HTML/CSS underneath. For a web app that
@@ -38,7 +42,10 @@ resume cold than one that doesn't.
 - **Claude Code** implements, tests, and verifies against the documents
   as ground truth. It should be reading `CLAUDE.md` at the start of every
   session and treating `spec.md`/`plan.md`/`tasks.md` as the actual
-  source of truth for what's being built — not the chat history.
+  source of truth for what's being built — not the chat history. Once
+  shipped code exists, it also drafts `plan.md` and `tasks.md` in Plan
+  Mode, since at that point the ground truth a plan extends lives where
+  only it can see.
 
 ## The document set
 
@@ -371,9 +378,55 @@ side (real infra stakes, a team involved), and follow that instead.
 1** — the constitution already exists and stays in force unless this
 particular feature genuinely requires amending it, per `CLAUDE.md`'s own
 rule (amend explicitly, in its own commit, before the spec proceeds).
-Steps 0 and 2 through 6 still happen the same way, still in chat before
-any code exists — a second or tenth spec doesn't skip the idea-and-design
-phase just because the project already has a working codebase.
+Steps 0 and 2 still happen the same way, in chat — a second or tenth
+spec doesn't skip the idea-and-design phase just because the project
+already has a working codebase. Steps 3 and 5, though, change hands
+once the project has shipped code — see the next section.
+
+## Who authors plan.md and tasks.md: a phase transition
+
+Authorship of `plan.md` and `tasks.md` splits along the what/how
+boundary, not the chat/Claude-Code boundary — and which tool holds the
+pen for the *how* depends on whether there's a codebase yet.
+
+**Until the project has shipped code, plan in chat.** A first spec's
+plan *invents* the architecture rather than extending one — there is
+nothing to inspect, and the design conversation holds all the relevant
+context. This is the original shape the skill grew from, and it remains
+right for that phase.
+
+**Once shipped code is what plans extend, plan in Claude Code.** A plan
+against a real codebase needs the actual model definitions, the actual
+view structure, the actual dependency-injection shape — ground truth
+that chat can only see through a manually-uploaded snapshot that starts
+subtly stale and drifts from there. The workaround is a relay: Claude
+Code prints state into chat, chat authors the plan against the paste, a
+transcription layer whose only function is preserving a rule written
+for a condition that no longer holds. Instead, once `spec.md` is
+approved: Claude Code drafts `plan.md` and `tasks.md` in Plan Mode,
+with the skeptical-reviewer applied to non-routine technical calls per
+the collaboration workflow, and commits them to the spec branch with
+the PR still in draft.
+
+**`spec.md` stays in chat in both phases.** It captures product intent,
+user-facing behavior, and decisions — the design conversation's actual
+job — and needs no repo access to write well.
+
+**The human review gates do not move.** Plan and tasks are both
+reviewed and approved by the person before any implementation task
+starts, in either phase. Drafting relocated; approval didn't — this
+changes who holds the pen, not who signs.
+
+Two risks worth naming, both covered by machinery the workflow already
+has. A planner with the code open may anchor on what's easy to build
+over what's right — but Plan Mode separates thinking from doing, the
+skeptical-reviewer exists precisely to challenge convenient answers,
+and the spec, authored in chat without implementation anchoring,
+remains the contract the plan is reviewed against. And a product
+decision surfacing mid-plan could get settled silently in `plan.md` —
+but the escalation rule already covers this: anything that turns out to
+be a product decision goes back to the person (in practice, back to
+the spec chat) rather than being resolved by the planner.
 
 ## Building tasks.md: from plan to an ordered task list
 
@@ -437,7 +490,9 @@ ended at merge. Handle it on a spectrum, matching its actual size:
   govern escalation during implementation apply here too: infeasibility/
   rework and a direction-changing unknown are exactly the signal that a
   "bug fix" has actually turned into something needing the real
-  spec → plan → tasks treatment, in chat, before more code gets written.
+  spec → plan → tasks treatment before more code gets written — the
+  spec in chat, the plan and tasks per the authorship phase transition
+  above (which, for a project with shipped code, means Claude Code).
 
 The existing per-task triage (see "The collaboration workflow" and
 `references/collaboration-workflow.md`) already governs how much

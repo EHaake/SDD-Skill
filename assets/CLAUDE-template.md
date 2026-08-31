@@ -61,6 +61,14 @@ review between each phase. Artifacts live in `specs/<NNN>-<slug>/`:
 - `plan.md` — technical design: types, data flow, what changes where.
 - `tasks.md` — ordered, small, independently verifiable tasks.
 
+Authorship: `spec.md` is written in the chat design conversation.
+Until this project has shipped code, `plan.md` and `tasks.md` are too;
+once shipped code is what plans extend, Claude Code drafts them instead
+— in Plan Mode, against the actual codebase, committed to the spec
+branch with the PR still in draft. The review gates do not move either
+way: plan and tasks are reviewed and approved by the person before any
+implementation task starts. Drafting relocates; approval doesn't.
+
 Do not begin implementation on a feature without an approved spec and
 plan in that feature's directory. When resuming a session, check
 `specs/<feature>/tasks.md` for current state before doing anything else.
