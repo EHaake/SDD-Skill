@@ -32,7 +32,9 @@ not summarized.
 
 <!-- Foundational setup. Mistakes here are cheap to catch immediately
 and expensive to unwind later — this phase (and the data-model phase
-right after it) is where per-task review is worth the friction. -->
+right after it) is where a per-task skeptical-reviewer pass is worth
+the cost, and, at the technical-lead level only, a per-task pause for
+the person. -->
 
 - [ ] **T001** — [...] *Verify: [concrete, checkable outcome].*
 
@@ -65,13 +67,32 @@ and no test fails when they go stale. -->
 
 ## Handoff note
 
-Once this file is reviewed and approved, hand it to the implementer with
-something like:
+Once this file is signed off (per the involvement level in the
+constitution), hand it to the implementer with something like:
 
 > Read [constitution file] and [spec/plan/tasks paths], then begin
-> implementing starting at the first task. For [foundational phases],
-> stop for review after each individual task. From [phase N] onward,
-> stop after each phase instead of after each task.
+> implementing starting at the first task. Involvement level is
+> [product owner / technical lead]. For [foundational phases], have the
+> skeptical-reviewer review after each task, scoped to that task's diff
+> and the plan section it implements[; technical lead only: and stop
+> for my review after each task as well]. From [phase N] onward, review
+> after each phase instead. Pause for me after each phase [or: "run
+> through phases X–Y without pausing"], and whenever something
+> unexpected bears on spec adherence.
+
+Every pause produces a report in this shape, in this order. The person
+may not be technical, and the report exists so they can act, not so
+the work is documented:
+
+1. **Why this pause** — a phase boundary, a spec-adherence question, or
+   an escalation trigger. One line.
+2. **What you can now do** — behavior that exists and can be tried,
+   stated as a user would experience it, so attestation is possible.
+3. **Where execution deviated from the spec, and why** — every place,
+   per the "never silently" principle, not just the interesting ones.
+4. **What needs your decision** — product questions only. Technical
+   detail lives in plan.md and the commit log for anyone who wants it;
+   it doesn't lead the report.
 
 ## Model and effort per phase (optional — skip by default)
 

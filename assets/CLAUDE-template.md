@@ -51,10 +51,29 @@ and why. -->
 easy to corrupt with a direct edit), name it explicitly and state the
 safe path around it. -->
 
+## Involvement level
+
+<!-- Pick one, decided in the constitution conversation, and delete the
+other. The skill's default is product owner. -->
+
+**Product owner.** The person owns `spec.md`, attests to behavior by
+using the app at phase pauses, and decides escalations. They do not
+approve technical work: `plan.md` and `tasks.md` are signed off by Plan
+Mode plus the `skeptical-reviewer`, foundational tasks are reviewed by
+the `skeptical-reviewer` rather than the person, and what reaches the
+person is a spec-conformance summary, not an architecture review.
+Implementation pauses after each phase unless the person says to run
+further, and whenever something unexpected bears on spec adherence.
+
+**Technical lead.** As above, but the person also reads and approves
+`plan.md` and `tasks.md`, and implementation pauses after every
+foundational task for their review.
+
 ## Spec-driven workflow
 
-This project follows spec → plan → tasks → implement, gated by human
-review between each phase. Artifacts live in `specs/<NNN>-<slug>/`:
+This project follows spec → plan → tasks → implement, gated by review
+between each phase — the person's or the `skeptical-reviewer`'s, per
+the involvement level above. Artifacts live in `specs/<NNN>-<slug>/`:
 
 - `spec.md` — what and why, user-facing behavior, acceptance criteria,
   explicit non-goals. No implementation detail.
@@ -65,9 +84,11 @@ Authorship: `spec.md` is written in the chat design conversation.
 Until this project has shipped code, `plan.md` and `tasks.md` are too;
 once shipped code is what plans extend, Claude Code drafts them instead
 — in Plan Mode, against the actual codebase, committed to the spec
-branch with the PR still in draft. The review gates do not move either
-way: plan and tasks are reviewed and approved by the person before any
-implementation task starts. Drafting relocates; approval doesn't.
+branch with the PR still in draft. Both are signed off before any
+implementation task starts: at the product-owner level by the
+`skeptical-reviewer` (blocking findings fixed and re-reviewed), with
+the person receiving a spec-conformance summary to approve; at the
+technical-lead level by the person directly.
 
 Do not begin implementation on a feature without an approved spec and
 plan in that feature's directory. When resuming a session, check
@@ -79,8 +100,9 @@ If the `spec-driven-development` skill is installed
 (`~/.claude/skills/spec-driven-development/` or a project-level
 `.claude/skills/`), its collaboration workflow applies automatically —
 routine tasks proceed normally, real decisions resolve via Plan Mode and
-the `skeptical-reviewer` subagent, and the person is looped in only when
-something in the design turns out infeasible or needs real rework, or a
+the `skeptical-reviewer` subagent, and beyond the pauses their
+involvement level defines, the person is looped in only when something
+in the design turns out infeasible or needs real rework, or a
 previously-unknown consideration surfaces that would materially change
 the project's direction. Nothing needs to be repeated here.
 

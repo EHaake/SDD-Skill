@@ -23,16 +23,21 @@ takes precedence over the user-level one for that project only.
 
 ## The per-task loop
 
-**On cadence, stated plainly up front**: the subagent isn't invoked on a
-fixed schedule — not every task, not automatically at the end of every
-phase. It's driven by the nature of each decision, per task (Step 1
-below), which could mean zero invocations in an all-mechanical phase or
-several in a decision-heavy one. Layered on top of that per-decision
-trigger is one recurring checkpoint that *is* close to a hard rule:
-before a spec's PR comes out of draft and merges (see "After
-implementation" below) — a whole-spec consistency sweep, not tied to
-any single task. Routine work should never see the subagent at all;
-that's the point of Step 1 existing.
+**On cadence, stated plainly up front**: the subagent has two kinds of
+invocation. The first is per-decision — driven by the nature of each
+task (Step 1 below), which could mean zero invocations in an
+all-mechanical phase or several in a decision-heavy one; routine work
+should never see the subagent on this path, and that's the point of
+Step 1 existing. The second is a small set of fixed checkpoints, which
+depend on the involvement level in `CLAUDE.md`. At every level: before
+a spec's PR comes out of draft and merges — a whole-spec consistency
+sweep, not tied to any single task (see "After implementation" below).
+At the product-owner level, two more, because the reviewer is standing
+in for the person there: sign-off on `plan.md` and `tasks.md` before
+implementation starts, and a review after every task in a foundational
+phase. Those stand-in reviews are what let the person's own pauses drop
+to per-phase, and they're scoped tightly (see "Keeping reviews cheap"
+below) precisely so that cadence stays affordable.
 
 ### Step 1 — Is this routine?
 
@@ -69,9 +74,13 @@ that it was.
 
 Activate Plan Mode (`Shift+Tab` twice, or `/plan`) before letting Claude
 Code touch any files. Let it research read-only and propose an approach.
-Read the plan yourself. Sometimes this alone resolves it — if the plan
-is obviously right, or obviously needs one small correction you can just
-state, do that and move on without further escalation.
+At the technical-lead level, read the plan yourself — sometimes this
+alone resolves it: if the plan is obviously right, or obviously needs
+one small correction you can just state, do that and move on without
+further escalation. At the product-owner level the person doesn't read
+the plan; it goes straight to the subagent in Step 3, and only a
+product question inside it — something `spec.md` doesn't settle —
+comes back to the person.
 
 ### Step 3 — Decide: subagent, or subagent-plus-chat?
 
@@ -98,9 +107,14 @@ and a git status snapshot — nothing else from the session. Name the
 spec directory and the specific artifact under review in the prompt;
 it can't infer them from a conversation it never saw.
 
-Read its findings. If it flags something real, discuss with the main
-Claude Code session, revise, and optionally re-review. If it comes back
-clean, approve and let implementation proceed.
+At the technical-lead level, read its findings: if it flags something
+real, discuss with the main Claude Code session, revise, and optionally
+re-review; if it comes back clean, approve and let implementation
+proceed. At the product-owner level the same loop runs without the
+person: the main session fixes blocking findings, re-invokes the
+reviewer until it signs off, and proceeds. The person hears about it in
+the next pause report — or immediately, if a finding hits an escalation
+trigger or raises a product question `spec.md` doesn't settle.
 
 **One of the two triggers** → do the subagent review as well, but also
 bring the specific question to a separate, fresh chat before finalizing
@@ -151,6 +165,33 @@ scope:
 > "This is the pre-merge whole-spec sweep for specs/004-search. Have
 > the skeptical-reviewer sweep spec.md, plan.md, tasks.md, ROADMAP.md,
 > DECISIONS.md, and the README for drift before this merges."
+
+## Keeping reviews cheap
+
+The reviewer is expensive when it reads the whole codebase to answer a
+narrow question, and at the product-owner level it's invoked often
+enough that this matters. The fix is in the invocation, not the agent:
+every non-sweep invocation names its scope, and the reviewer stays
+inside it.
+
+- **Per-task review** (foundational phases): the task's diff (supplied,
+  since the reviewer has no git), the task's line in `tasks.md`, the
+  `plan.md` section it implements, and the `spec.md` acceptance
+  criteria it serves. Not the rest of the codebase.
+- **Plan/tasks sign-off**: `spec.md`, `CLAUDE.md`, and the draft
+  `plan.md`/`tasks.md` — plus, for a project with shipped code, only
+  the existing files the plan claims to extend or depend on.
+- **Pre-merge sweep**: the whole document set for that spec, by design.
+  This is the one invocation that's supposed to be broad, and it
+  happens once per spec.
+
+> "Review task T014 only: diff in scratch/T014.diff, plan.md §Data
+> model, spec.md acceptance criteria 3 and 4. Don't read beyond those
+> unless a specific finding requires following a reference."
+
+The reviewer's scope statement — the first line of its report — is how
+you check the scoping took. If it reports examining far more than it
+was given, the invocation was too loose.
 
 ## Recording what a review decided
 
@@ -205,9 +246,12 @@ anything to the person:
 ## What "good" looks like over time
 
 This workflow is working if: routine tasks move through Claude Code
-without ever surfacing here: the subagent gets invoked periodically, not
-constantly, and mostly comes back either clean or with something
-genuinely worth acting on; and a separate chat gets used rarely enough
+without ever surfacing here; the subagent gets invoked at its fixed
+checkpoints and only occasionally beyond them, scoped tightly enough
+that its cost tracks the size of what it's reviewing, and mostly comes
+back either clean or with something genuinely worth acting on; the
+person's pauses are ones they actually read rather than click through;
+and a separate chat gets used rarely enough
 that each instance is memorable, not routine. If any of those stop being
 true, that's worth revisiting — including reconsidering the triage in
 Step 1, which is a judgment call that should improve with actual

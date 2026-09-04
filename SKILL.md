@@ -47,6 +47,33 @@ resume cold than one that doesn't.
   Mode, since at that point the ground truth a plan extends lives where
   only it can see.
 
+## Involvement level: decide it once, at the start
+
+The person's role in a project is a choice made in the constitution
+conversation and written into `CLAUDE.md`, not something re-derived at
+every pause. Two levels:
+
+- **Product owner** (the default). The person owns `spec.md` — that's
+  where most of their involvement lives — attests to behavior by using
+  the app at phase pauses, and decides the two escalation triggers.
+  They never approve technical work: `plan.md` and `tasks.md` are
+  signed off by Plan Mode plus the skeptical-reviewer, and foundational
+  tasks are reviewed by the skeptical-reviewer rather than by the
+  person. What reaches them is a spec-conformance summary, not an
+  architecture review.
+- **Technical lead**. The person also reads and approves `plan.md` and
+  `tasks.md`, and implementation pauses after every foundational task
+  for their review — the original shape of this skill.
+
+Everything below that mentions a review, an approval, or a pause is
+written for the product-owner level unless it says otherwise; the
+technical-lead variant is the same flow with the person added back at
+those gates. The default is product owner because, across the projects
+this skill has run on, a person who set out not to touch code turned
+out not to want to approve architecture either — the per-task pauses
+became a report glanced at and a button pressed, which is worse than no
+gate: it looks like review without being one.
+
 ## The document set
 
 - **`CLAUDE.md`** — the constitution. Lives at the repo root, gets read
@@ -187,6 +214,18 @@ rule:
 - Re-tighten around anything that turns out to be a genuine judgment
   call, even mid-phase, rather than treating the cadence as fixed once
   set.
+
+This tiering is the *reviewer's* cadence. At the product-owner level,
+every one of those reviews is a skeptical-reviewer pass, and none of
+them pauses for the person. The person's own pauses follow a different
+rule: after each phase (unless they've said to run further), and
+whenever something unexpected surfaces that bears on spec adherence. At
+the technical-lead level the foundational per-task reviews are the
+person's as well, which is where their pauses come from. Either way,
+the reviewer's per-task passes should be scoped tightly — the task's
+diff, the plan section it implements, the acceptance criteria it serves
+— not a fresh whole-codebase read each time; see "Keeping reviews
+cheap" in `references/collaboration-workflow.md`.
 
 **A related idea — tiering which model and effort level handles which
 task, by this same foundational-vs-mechanical split — was tried on the
@@ -343,9 +382,11 @@ side (real infra stakes, a team involved), and follow that instead.
    settled is working backwards — technical decisions usually clarify
    naturally once the idea is clear, not the other way around.
 1. **Constitution conversation.** Platform/language/architecture choices,
-   testing philosophy, dependency policy — write `CLAUDE.md` before any
-   code exists, so the first thing Claude Code reads when it scaffolds
-   the project is the constitution, not its own defaults. Move through
+   testing philosophy, dependency policy, and the person's involvement
+   level (see "Involvement level" above — ask once, directly, and
+   default to product owner) — write `CLAUDE.md` before any code
+   exists, so the first thing Claude Code reads when it scaffolds the
+   project is the constitution, not its own defaults. Move through
    this efficiently once the idea is settled: when someone doesn't have
    a strong preference on a technical choice, recommend a sensible
    default and explain briefly why, rather than opening it up as an
@@ -412,10 +453,22 @@ the PR still in draft.
 user-facing behavior, and decisions — the design conversation's actual
 job — and needs no repo access to write well.
 
-**The human review gates do not move.** Plan and tasks are both
-reviewed and approved by the person before any implementation task
-starts, in either phase. Drafting relocated; approval didn't — this
-changes who holds the pen, not who signs.
+**Who signs off depends on involvement level, and this is the one place
+the levels differ materially.** At the technical-lead level, the person
+reads and approves `plan.md` and `tasks.md` before any implementation
+task starts, in either authorship phase — drafting relocated; approval
+didn't. At the product-owner level, Plan Mode plus the
+skeptical-reviewer is the gate: the reviewer checks the draft against
+`spec.md` and `CLAUDE.md`, blocking findings go back to the drafting
+session to be fixed and re-reviewed, and the person receives a
+**spec-conformance summary** rather than the plan itself — which
+acceptance criteria the plan serves and how, where it deviates from the
+spec and why, and any product question it surfaced that needs their
+call. They approve the *what* that summary describes; the *how* is
+already signed. Supervision hasn't been removed, it's been relocated:
+to the spec (the contract), the reviewer (the check), and the
+escalation triggers (the exit). That's what keeps this from reading as
+"Claude Code plans and builds unsupervised."
 
 Two risks worth naming, both covered by machinery the workflow already
 has. A planner with the code open may anchor on what's easy to build
@@ -462,8 +515,11 @@ things made this work well on the reference project:
    already-completed task references, and reads honestly as "found
    here" rather than implying it was planned from the start.
 6. **State the review cadence per phase, not per task** — see "Review
-   cadence" above. `tasks-template.md`'s handoff note is where this gets
-   stated explicitly for whoever picks up implementation.
+   cadence" above — and state the person's pause cadence separately
+   from the reviewer's, per the involvement level in `CLAUDE.md`.
+   `tasks-template.md`'s handoff note is where both get stated
+   explicitly for whoever picks up implementation, along with the shape
+   of the report a pause should produce.
 
 ## Bugs found after a spec ships
 
