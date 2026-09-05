@@ -101,13 +101,16 @@ the work is documented:
 
 <!-- The constitution's model policy decides which tier runs each task
 at dispatch time — there's no per-phase table to fill in. What's worth
-recording here is the evidence: per-task token usage from the
-subagent's return, any escape-hatch miss (a task the orchestrator had
+recording here is the evidence: token usage from each subagent return
+— implementer runs and reviewer invocations alike — any escape-hatch
+miss (a task the orchestrator had
 to redo at the top tier, and why), and, if the third tier is on, which
 tasks it took and whether they held up. Compare the spec's total
 against a previous spec of similar size before treating the policy as
 settled. Drop this section once a project has that answer. -->
 
-| Task | Tier | Tokens | Outcome / miss reason |
+| Task / invocation | Tier | Tokens | Outcome / miss reason |
 |---|---|---|---|
 | T001 | [opus] | [...] | verified first try |
+| T001 review | [opus] | [...] | signed off; scope statement matched the bundle |
+| plan sign-off | [top tier] | [...] | fix and re-review ×1, then signed off |

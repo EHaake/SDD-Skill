@@ -233,8 +233,12 @@ cheap" in `references/collaboration-workflow.md`.
 ## Model tiering: decisions at the top tier, execution one tier down
 
 The best available model does everything that involves a real
-decision: the spec conversation, plan and task drafting, the
-skeptical-reviewer, Step 1 triage, and orchestration of implementation.
+decision: the spec conversation, plan and task drafting, Step 1 triage,
+orchestration of implementation, and the skeptical-reviewer when it's
+judging a decision (sign-off, the pre-merge sweep, routine-but-real
+reviews). The reviewer's per-task checks in foundational phases — a
+diff against its plan section — run one tier down, like the
+implementation they check.
 Implementation itself — the edit, build, test loop that accounts for
 most of a spec's tokens — runs one tier down, in the `sdd-implementer`
 subagent (`assets/sdd-implementer.md`), one task per dispatch. The
@@ -268,8 +272,9 @@ How the loop runs, per task, in the orchestrating session:
    first.
 3. **Verify by running, not by reading.** When the implementer
    returns, re-run the build and tests yourself; on a foundational
-   task, write the working-tree diff to a scratch file and invoke the
-   reviewer scoped to it. Open the diff only when verification fails.
+   task, assemble a review bundle with shell (diff, task line, plan
+   section, acceptance criteria) and invoke the reviewer on that alone.
+   Open the diff yourself only when verification fails.
    This rule is what makes the savings real: if the orchestrator reads
    every diff in full at the top tier, the work has been paid for
    twice.
@@ -311,9 +316,12 @@ The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
 involvement level. The two are orthogonal — a product owner never sees
 any of this — but both are decide-once-at-the-start settings, and they
-belong together. The skeptical-reviewer's definition uses `model:
-inherit` so it always runs at the orchestrator's tier, whatever that
-is.
+belong together. The skeptical-reviewer's definition defaults to one
+tier down (`model: opus`), the right tier for its frequent per-task
+checks; the orchestrator overrides it up for sign-off, the sweep, and
+decision reviews. See "Keeping reviews cheap" in the collaboration
+workflow for the reasoning, and for the bundle that keeps per-task
+reviews from reading the codebase at all.
 
 ## Principles worth generalizing
 

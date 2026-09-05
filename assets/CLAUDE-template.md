@@ -75,9 +75,17 @@ foundational task for their review.
 names as models change; the roles don't. -->
 
 - **Decisions run at the best available tier**: the spec conversation,
-  plan and task drafting, the `skeptical-reviewer` (its definition
-  inherits the orchestrator's model), Step 1 triage, and orchestration
-  of implementation.
+  plan and task drafting, Step 1 triage, orchestration of
+  implementation, and the `skeptical-reviewer` when it's judging a
+  decision — plan/tasks sign-off, the pre-merge sweep, and reviews of
+  routine-but-real decisions — via a per-call model override up from
+  its default.
+- **The `skeptical-reviewer` runs one tier down by default** (its
+  definition says `opus`) for per-task reviews in foundational phases,
+  which are narrow checks of a diff against its plan section. Each
+  per-task review gets a single bundle file assembled with shell —
+  diff, task line, plan section, acceptance criteria — and reads
+  nothing else.
 - **Implementation runs one tier down**, in the `sdd-implementer`
   subagent, one task per dispatch, sequentially. The orchestrating
   session triages each task, dispatches routine ones with a packet
@@ -93,9 +101,10 @@ names as models change; the roles don't. -->
 - **Third tier**: off. <!-- Turn on per project once the first spec's
   tier log justifies it: "Sonnet for tasks with an automated Verify
   check, a named pattern file, and a small footprint." -->
-- **Log per-task token usage and tier misses** in `tasks.md`'s tier log
-  for the first spec under this policy, and compare against a previous
-  spec before treating the policy as settled.
+- **Log token usage per implementer run and per reviewer invocation**,
+  plus tier misses, in `tasks.md`'s tier log for the first spec under
+  this policy, and compare against a previous spec before treating the
+  policy as settled.
 
 ## Spec-driven workflow
 

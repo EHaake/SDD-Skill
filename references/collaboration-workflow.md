@@ -158,9 +158,9 @@ orchestrates. Per task:
    > Models/ItemStore.swift. Report per your definition."
 
 3. On return: re-run the build and tests yourself. Foundational task →
-   `git diff > scratch/T014.diff`, then the skeptical-reviewer scoped
-   to it (see "Keeping reviews cheap"). Read the diff only if something
-   failed.
+   assemble the review bundle with shell and invoke the
+   skeptical-reviewer on it at its default tier (see "Keeping reviews
+   cheap"). Read the diff yourself only if something failed.
 4. Commit, check the box in `tasks.md`, record findings in `plan.md` or
    `tasks.md` now. You are the only writer of `tasks.md` and the only
    one who commits.
@@ -206,15 +206,36 @@ scope:
 
 The reviewer is expensive when it reads the whole codebase to answer a
 narrow question, and at the product-owner level it's invoked often
-enough that this matters. The fix is in the invocation, not the agent:
-every non-sweep invocation names its scope, and the reviewer stays
-inside it.
+enough that this matters. Two levers: what it's given, and which tier
+it runs at.
 
-- **Per-task review** (foundational phases): the task's diff — the
-  uncommitted working-tree diff written to a scratch file, supplied
-  since the reviewer has no git — the task's line in `tasks.md`, the
-  `plan.md` section it implements, and the `spec.md` acceptance
-  criteria it serves. Not the rest of the codebase.
+**Give it a bundle, not pointers.** For a per-task review, assemble one
+scratch file containing everything the review needs — the uncommitted
+working-tree diff, the task line, the `plan.md` section it implements,
+and the `spec.md` acceptance criteria it serves — using shell, so the
+orchestrator never loads that content into its own context:
+
+```
+{ echo "## Task";                grep -n "T014" specs/004-search/tasks.md;
+  echo "## Plan section";        sed -n '/^## Data model/,/^## /p' specs/004-search/plan.md;
+  echo "## Acceptance criteria"; sed -n '/^<criteria heading>/,/^## /p' specs/004-search/spec.md;
+  echo "## Diff";                git diff;
+} > scratch/T014-review.md
+```
+
+A reviewer with the whole question in front of it has no reason to go
+looking, which is a stronger constraint than telling it not to. The
+invocation then names the bundle and nothing else:
+
+> "Per-task review of T014: everything you need is in
+> scratch/T014-review.md. Don't read the codebase or grep for context
+> beyond it unless a specific finding requires following a reference —
+> and say so in your scope statement if you do."
+
+Scope by invocation type:
+
+- **Per-task review** (foundational phases): the bundle, plus
+  `CLAUDE.md` it already has. Nothing else.
 - **Plan/tasks sign-off**: `spec.md`, `CLAUDE.md`, and the draft
   `plan.md`/`tasks.md` — plus, for a project with shipped code, only
   the existing files the plan claims to extend or depend on.
@@ -222,13 +243,25 @@ inside it.
   This is the one invocation that's supposed to be broad, and it
   happens once per spec.
 
-> "Review task T014 only: diff in scratch/T014.diff, plan.md §Data
-> model, spec.md acceptance criteria 3 and 4. Don't read beyond those
-> unless a specific finding requires following a reference."
+**Tier by invocation type.** The reviewer's definition defaults to one
+tier below the orchestrator (`model: opus`), which is right for
+per-task reviews — narrow checks of a diff against its plan section,
+and the frequent case. Override up to the orchestrator's own tier for
+the invocations where the reviewer is exercising judgment rather than
+checking transcription: plan/tasks sign-off, the pre-merge sweep, and
+reviews of routine-but-real decisions from Step 3. Those happen a few
+times per spec; per-task reviews happen on every foundational task.
+The default should be the frequent case, because forgetting to
+override up costs a lesser review while forgetting to override down
+costs the budget.
 
-The reviewer's scope statement — the first line of its report — is how
-you check the scoping took. If it reports examining far more than it
-was given, the invocation was too loose.
+**Log it.** The subagent's return reports its token usage. Record each
+reviewer invocation in the spec's tier log alongside the implementer
+runs — invocation type, tier, tokens. The reviewer's scope statement,
+the first line of its report, says what it actually read; if the
+tokens or the scope statement show it examining far more than the
+bundle, the invocation was too loose, and the log will show which
+invocation type is the outlier.
 
 ## Recording what a review decided
 
