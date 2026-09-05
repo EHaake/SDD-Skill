@@ -8,17 +8,18 @@ document afterward, not something to improvise around silently.
 
 ## One-time setup
 
-1. Place `skeptical-reviewer.md` (in this skill's `assets/` folder) at
-   `~/.claude/agents/skeptical-reviewer.md` — the user-level directory,
-   so it's available in every project automatically, not just the one
-   it was first set up in.
-2. In any Claude Code session, confirm it's recognized: ask "what
-   subagents do you have available?" or equivalent, and check
-   `skeptical-reviewer` appears.
-3. Done. It never needs to be recreated per project.
+1. Place both agent definitions from this skill's `assets/` folder —
+   `skeptical-reviewer.md` and `sdd-implementer.md` — in
+   `~/.claude/agents/`, the user-level directory, so they're available
+   in every project automatically, not just the one they were first
+   set up in.
+2. In any Claude Code session, confirm they're recognized: ask "what
+   subagents do you have available?" or equivalent, and check both
+   `skeptical-reviewer` and `sdd-implementer` appear.
+3. Done. They never need to be recreated per project.
 
-If a specific project wants its own customized version instead of the
-shared one, a copy at that project's `.claude/agents/skeptical-reviewer.md`
+If a specific project wants its own customized version of either
+instead of the shared one, a copy at that project's `.claude/agents/`
 takes precedence over the user-level one for that project only.
 
 ## The per-task loop
@@ -43,9 +44,9 @@ below) precisely so that cadence stays affordable.
 
 Before Claude Code starts on a task, ask whether it's well-specified and
 mechanical — matches an established pattern already in the codebase, no
-real judgment call involved. If yes: let it proceed normally, no
-subagent, no separate chat. This is most tasks, most of the time, and
-should stay fast.
+real judgment call involved. If yes: dispatch it (see "The dispatch
+loop" below) — no reviewer, no Plan Mode, no separate chat. This is
+most tasks, most of the time, and should stay fast.
 
 If the task involves any of the following, it's not routine — continue
 to Step 2:
@@ -137,6 +138,41 @@ earn the tightest review tier, not a routine step. If it's happening for
 most tasks, something in Step 1's triage is being applied too
 conservatively.
 
+## The dispatch loop: who does the typing
+
+Under the model policy the constitution sets (see the skill's "Model
+tiering" section), the main session doesn't implement tasks itself; it
+orchestrates. Per task:
+
+1. Step 1 triage, as above. Routine → dispatch. Not routine → Plan Mode
+   and the subagent at the top tier until what remains is
+   transcription; then dispatch that.
+2. Dispatch to `sdd-implementer` with a packet: the task line, the
+   `plan.md` section, the `spec.md` acceptance criteria, the files
+   involved, the file whose pattern to copy, and any not-yet-recorded
+   finding from earlier tasks the implementer needs.
+
+   > "Implement T014 from specs/004-search/tasks.md. Plan section:
+   > plan.md §Data model. Acceptance criteria: spec.md 3 and 4. Touches
+   > Models/SearchIndex.swift and its tests; copy the pattern in
+   > Models/ItemStore.swift. Report per your definition."
+
+3. On return: re-run the build and tests yourself. Foundational task →
+   `git diff > scratch/T014.diff`, then the skeptical-reviewer scoped
+   to it (see "Keeping reviews cheap"). Read the diff only if something
+   failed.
+4. Commit, check the box in `tasks.md`, record findings in `plan.md` or
+   `tasks.md` now. You are the only writer of `tasks.md` and the only
+   one who commits.
+5. Escape hatch: two failed verifications, or a "stopped" report on
+   something you consider well-specified → do the task yourself at the
+   top tier and log the miss in the tier log.
+
+One task at a time. The implementer's "stopped on a judgment call"
+report is the cheapest escalation in the whole workflow — it costs one
+subagent run — so treat it as the system working, not as a failure to
+route around.
+
 ## After implementation, not just before
 
 The subagent is equally useful pointed at something already built,
@@ -174,8 +210,9 @@ enough that this matters. The fix is in the invocation, not the agent:
 every non-sweep invocation names its scope, and the reviewer stays
 inside it.
 
-- **Per-task review** (foundational phases): the task's diff (supplied,
-  since the reviewer has no git), the task's line in `tasks.md`, the
+- **Per-task review** (foundational phases): the task's diff — the
+  uncommitted working-tree diff written to a scratch file, supplied
+  since the reviewer has no git — the task's line in `tasks.md`, the
   `plan.md` section it implements, and the `spec.md` acceptance
   criteria it serves. Not the rest of the codebase.
 - **Plan/tasks sign-off**: `spec.md`, `CLAUDE.md`, and the draft

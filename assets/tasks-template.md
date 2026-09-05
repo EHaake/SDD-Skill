@@ -15,8 +15,9 @@ something looks off.
 
 <!-- WARNING, and worth leaving this comment in the real file: once
 implementation starts, this file gets written by more than one party —
-whoever's steering adds scope and reshuffles tasks; the implementer
-checks boxes and adds findings. Never edit this file from a stale copy.
+whoever's steering adds scope and reshuffles tasks; the implementing
+session (the orchestrator — never the sdd-implementer subagent) checks
+boxes and adds findings. Never edit this file from a stale copy.
 Prefer small, targeted edits over regenerating it wholesale — a full
 replacement silently discards whatever the other party added since your
 copy was taken. This is the single most common way a project like this
@@ -72,7 +73,9 @@ constitution), hand it to the implementer with something like:
 
 > Read [constitution file] and [spec/plan/tasks paths], then begin
 > implementing starting at the first task. Involvement level is
-> [product owner / technical lead]. For [foundational phases], have the
+> [product owner / technical lead]. Dispatch each routine task to the
+> sdd-implementer per the constitution's model policy; verify by
+> running, then commit. For [foundational phases], have the
 > skeptical-reviewer review after each task, scoped to that task's diff
 > and the plan section it implements[; technical lead only: and stop
 > for my review after each task as well]. From [phase N] onward, review
@@ -94,19 +97,17 @@ the work is documented:
    detail lives in plan.md and the commit log for anyone who wants it;
    it doesn't lead the report.
 
-## Model and effort per phase (optional — skip by default)
+## Tier log (recommended for the first spec under a model policy)
 
-<!-- Skip this section unless there's a genuine, active budget or quota
-constraint. The reference project found that defaulting to the best
-available model at maximum effort for everything was simpler and more
-reliable than trying to predict in advance which tasks could safely use
-less — several tasks assumed to be safely mechanical benefited from the
-top tier in ways that weren't obvious until after the fact. If real
-resource pressure does show up, this table is still a reasonable
-starting shape — but treat any specific tier assignment in it as a
-guess to verify, not a rule to trust. -->
+<!-- The constitution's model policy decides which tier runs each task
+at dispatch time — there's no per-phase table to fill in. What's worth
+recording here is the evidence: per-task token usage from the
+subagent's return, any escape-hatch miss (a task the orchestrator had
+to redo at the top tier, and why), and, if the third tier is on, which
+tasks it took and whether they held up. Compare the spec's total
+against a previous spec of similar size before treating the policy as
+settled. Drop this section once a project has that answer. -->
 
-| Phase | Model / effort | Why |
-|---|---|---|
-| 0 — [...] | [top tier], [high effort] | Foundational; mistakes are expensive to unwind. |
-| N — [...] | [lighter tier], [lower effort] | Well-specified, mechanical. |
+| Task | Tier | Tokens | Outcome / miss reason |
+|---|---|---|---|
+| T001 | [opus] | [...] | verified first try |

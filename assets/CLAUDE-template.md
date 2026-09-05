@@ -69,6 +69,34 @@ further, and whenever something unexpected bears on spec adherence.
 `plan.md` and `tasks.md`, and implementation pauses after every
 foundational task for their review.
 
+## Model policy
+
+<!-- Decided once, alongside the involvement level. Adjust the tier
+names as models change; the roles don't. -->
+
+- **Decisions run at the best available tier**: the spec conversation,
+  plan and task drafting, the `skeptical-reviewer` (its definition
+  inherits the orchestrator's model), Step 1 triage, and orchestration
+  of implementation.
+- **Implementation runs one tier down**, in the `sdd-implementer`
+  subagent, one task per dispatch, sequentially. The orchestrating
+  session triages each task, dispatches routine ones with a packet
+  (task line, plan section, acceptance criteria, files, the pattern
+  file to copy), and on return verifies by running — build and tests
+  re-run by the orchestrator itself, the `skeptical-reviewer` on
+  foundational tasks — not by re-reading the diff. Only the
+  orchestrator edits `tasks.md` or commits.
+- **Escape hatch**: two failed verifications on one task, or a "stopped
+  on a judgment call" the orchestrator considers well-specified, and
+  the orchestrator does that task itself at the top tier, noting the
+  miss in `tasks.md`.
+- **Third tier**: off. <!-- Turn on per project once the first spec's
+  tier log justifies it: "Sonnet for tasks with an automated Verify
+  check, a named pattern file, and a small footprint." -->
+- **Log per-task token usage and tier misses** in `tasks.md`'s tier log
+  for the first spec under this policy, and compare against a previous
+  spec before treating the policy as settled.
+
 ## Spec-driven workflow
 
 This project follows spec → plan → tasks → implement, gated by review
@@ -123,6 +151,9 @@ After any implementation task, Claude Code must:
 
 A task is not complete until steps 1–2 are green. Do not weaken, skip, or
 delete a test to make it pass — if a test seems wrong, flag it and ask.
+When the task was dispatched to the `sdd-implementer`, its report is not
+a substitute for this: the orchestrator re-runs steps 1–2 itself before
+committing.
 
 ## Git conventions
 
@@ -145,5 +176,7 @@ delete a test to make it pass — if a test seems wrong, flag it and ask.
 
 ## Commits
 
-- One commit per completed task where practical, referencing the task ID.
+- One commit per completed task where practical, referencing the task ID
+  — made by the orchestrating session after its own verification, never
+  by the implementer subagent.
 - Commit messages describe what changed and why, not "implement task 3".

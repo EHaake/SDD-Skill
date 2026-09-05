@@ -45,7 +45,10 @@ resume cold than one that doesn't.
   source of truth for what's being built — not the chat history. Once
   shipped code exists, it also drafts `plan.md` and `tasks.md` in Plan
   Mode, since at that point the ground truth a plan extends lives where
-  only it can see.
+  only it can see. During implementation it orchestrates rather than
+  types: each routine task is dispatched to the `sdd-implementer`
+  subagent one tier down, and the main session triages, verifies, and
+  commits (see "Model tiering" below).
 
 ## Involvement level: decide it once, at the start
 
@@ -227,20 +230,90 @@ diff, the plan section it implements, the acceptance criteria it serves
 — not a fresh whole-codebase read each time; see "Keeping reviews
 cheap" in `references/collaboration-workflow.md`.
 
-**A related idea — tiering which model and effort level handles which
-task, by this same foundational-vs-mechanical split — was tried on the
-reference project and deliberately abandoned partway through**, in
-favor of the best available model at maximum effort for everything.
-It's intuitive on paper, but predicting in advance which tasks only
-needed a lighter tier turned out to be less reliable than expected —
-several tasks assumed to be safely mechanical benefited from the top
-tier in ways that weren't obvious until after the fact. Given
-sufficient budget or quota headroom, defaulting to the best available
-tier for everything is simpler and was, in practice, the better call.
-If genuine resource pressure ever does show up, the tiering instinct is
-still worth reaching for — but treat any specific tier assignment as a
-guess to verify, not a rule to trust blindly, given it was wrong often
-enough here to be worth that caution.
+## Model tiering: decisions at the top tier, execution one tier down
+
+The best available model does everything that involves a real
+decision: the spec conversation, plan and task drafting, the
+skeptical-reviewer, Step 1 triage, and orchestration of implementation.
+Implementation itself — the edit, build, test loop that accounts for
+most of a spec's tokens — runs one tier down, in the `sdd-implementer`
+subagent (`assets/sdd-implementer.md`), one task per dispatch. The
+split is by *role*, decided per task at execution time, not by a table
+written in advance.
+
+That distinction is the whole reason this works where an earlier
+attempt didn't. The reference project tried tiering model and effort
+per task, predicted up front by the foundational-vs-mechanical split,
+and abandoned it: several tasks assumed safely mechanical benefited
+from the top tier in ways nobody saw coming. What's different now is
+that the strong model reads every task before dispatching it (Step 1
+triage), reads every report that comes back, re-runs verification
+itself, and has the reviewer on foundational tasks — and the
+implementer is under a standing rule to stop and return the moment it
+hits a judgment call rather than resolve it. The failure that sank the
+static table — a lighter model quietly doing a worse job on a task that
+looked mechanical — now has three independent catches instead of none.
+
+How the loop runs, per task, in the orchestrating session:
+
+1. **Triage** (Step 1 of the collaboration workflow). Routine →
+   dispatch. Not routine → Plan Mode and the reviewer first, at the top
+   tier, until what remains is transcription; then dispatch that.
+2. **Dispatch with a packet, not a pointer.** The subagent starts cold
+   — it sees `CLAUDE.md`, its own definition, and the prompt. Name the
+   task line, the `plan.md` section it implements, the `spec.md`
+   acceptance criteria it serves, the files involved, and the existing
+   file whose pattern to copy. Findings from earlier tasks that aren't
+   yet written down go in the packet too — or better, get written down
+   first.
+3. **Verify by running, not by reading.** When the implementer
+   returns, re-run the build and tests yourself; on a foundational
+   task, write the working-tree diff to a scratch file and invoke the
+   reviewer scoped to it. Open the diff only when verification fails.
+   This rule is what makes the savings real: if the orchestrator reads
+   every diff in full at the top tier, the work has been paid for
+   twice.
+4. **Commit, check the box, record findings.** The orchestrator is the
+   only writer of `tasks.md` and the only one who commits — a commit
+   means orchestrator-verified. Findings from the report go into
+   `plan.md` or `tasks.md` now, not later, since the next implementer
+   won't have seen them otherwise.
+5. **Sequential, one task at a time.** Commit-per-task and shared files
+   make parallel implementers messy; parallel dispatch is a deliberate
+   opt-in for a later day, not the default.
+
+**The escape hatch.** If the implementer fails verification twice on
+the same task, or returns "stopped on a judgment call" for something
+the orchestrator considers well-specified, the orchestrator does that
+task itself at the top tier and notes the miss in `tasks.md`. That's
+the surviving form of the reference project's lesson: a tier assignment
+is a guess to verify, and the misses are the data.
+
+**A third tier is available but off by default.** The dispatch can
+override the implementer's model per call — Sonnet for a task that
+meets all three of: an existing automated check as its Verify criterion
+(a manual-check task never drops tiers, because the orchestrator can't
+cheaply verify it), a named file in the codebase whose pattern it
+copies, and a small footprint. Leave it off until a project's first
+spec under this policy shows Opus dispatch working, then turn it on in
+that project's `CLAUDE.md` if the numbers justify it.
+
+**Treat the first spec as the experiment.** The subagent's return
+reports its token usage; log it per task in `tasks.md`'s tier log,
+alongside any escape-hatch misses, and compare the spec's total against
+a previous spec of similar size before treating the policy as settled.
+The structural case for savings — cheaper rates on the bulk of the
+work, and small fresh contexts instead of one that accumulates every
+task — is strong, but it's an argument, not a measurement, until a
+project has measured it.
+
+The policy is written into each project's `CLAUDE.md` (see the
+constitution template's "Model policy" section), next to the
+involvement level. The two are orthogonal — a product owner never sees
+any of this — but both are decide-once-at-the-start settings, and they
+belong together. The skeptical-reviewer's definition uses `model:
+inherit` so it always runs at the orchestrator's tier, whatever that
+is.
 
 ## Principles worth generalizing
 
@@ -562,8 +635,9 @@ spec" was never written with work-that-isn't-a-spec in mind.
 `assets/` has starting points for the four core documents —
 `CLAUDE-template.md`, `spec-template.md`, `plan-template.md`, and
 `tasks-template.md` — plus `design-brief-template.md` for projects with
-a UI, and `skeptical-reviewer.md`, a ready-to-use Claude Code subagent
-definition. They're skeletons with placeholders and inline guidance
+a UI, and two ready-to-use Claude Code subagent definitions:
+`skeptical-reviewer.md` and `sdd-implementer.md`. The document
+templates are skeletons with placeholders and inline guidance
 comments, not fill-in-the-blank forms — expect to restructure sections
 as the actual project's needs diverge from the template, the same way
 real projects always do.
