@@ -103,11 +103,11 @@ the work is documented:
 at dispatch time — there's no per-phase table to fill in. What's worth
 recording here is the evidence: token usage from each subagent return
 — implementer runs and reviewer invocations alike — any escape-hatch
-miss (a task the orchestrator had
-to redo at the top tier, and why), and, if the third tier is on, which
-tasks it took and whether they held up. Compare the spec's total
-against a previous spec of similar size before treating the policy as
-settled. Drop this section once a project has that answer. -->
+miss (a task the orchestrator had to redo at the top tier, and why),
+and, if the third tier is on, which tasks it took and whether they held
+up. Compare the spec's total against a previous spec of similar size
+before treating the policy as settled. Drop this section once a project
+has that answer. -->
 
 | Task / invocation | Tier | Tokens | Outcome / miss reason |
 |---|---|---|---|
