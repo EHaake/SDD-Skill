@@ -236,9 +236,9 @@ The best available model does everything that involves a real
 decision: the spec conversation, plan and task drafting, Step 1 triage,
 orchestration of implementation, and the skeptical-reviewer when it's
 judging a decision (sign-off, the pre-merge sweep, routine-but-real
-reviews). The reviewer's per-task checks in foundational phases — a
-diff against its plan section — run one tier down, like the
-implementation they check.
+reviews). The reviewer's per-task checks in foundational phases and
+per-phase checks in mechanical ones — a diff against the plan sections
+it implements — run one tier down, like the implementation they check.
 Implementation itself — the edit, build, test loop that accounts for
 most of a spec's tokens — runs one tier down, in the `sdd-implementer`
 subagent (`assets/sdd-implementer.md`), one task per dispatch. The
@@ -317,11 +317,11 @@ constitution template's "Model policy" section), next to the
 involvement level. The two are orthogonal — a product owner never sees
 any of this — but both are decide-once-at-the-start settings, and they
 belong together. The skeptical-reviewer's definition defaults to one
-tier down (`model: opus`), the right tier for its frequent per-task
-checks; the orchestrator overrides it up for sign-off, the sweep, and
-decision reviews. See "Keeping reviews cheap" in the collaboration
-workflow for the reasoning, and for the bundle that keeps per-task
-reviews from reading the codebase at all.
+tier down (`model: opus`), the right tier for its frequent per-task and
+per-phase checks; the orchestrator overrides it up for sign-off, the
+sweep, and decision reviews. See "Keeping reviews cheap" in the
+collaboration workflow for the reasoning, and for the bundle that keeps
+those reviews from reading the codebase at all.
 
 ## Principles worth generalizing
 

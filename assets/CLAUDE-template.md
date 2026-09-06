@@ -81,11 +81,11 @@ names as models change; the roles don't. -->
   routine-but-real decisions — via a per-call model override up from
   its default.
 - **The `skeptical-reviewer` runs one tier down by default** (its
-  definition says `opus`) for per-task reviews in foundational phases,
-  which are narrow checks of a diff against its plan section. Each
-  per-task review gets a single bundle file assembled with shell —
-  diff, task line, plan section, acceptance criteria — and reads
-  nothing else.
+  definition says `opus`) for per-task reviews in foundational phases
+  and per-phase reviews in mechanical ones — checks of a diff against
+  the plan sections it implements. Each such review gets a single
+  bundle file assembled with shell — diff, task lines, plan sections,
+  acceptance criteria — and reads nothing else.
 - **Implementation runs one tier down**, in the `sdd-implementer`
   subagent, one task per dispatch, sequentially. The orchestrating
   session triages each task, dispatches routine ones with a packet

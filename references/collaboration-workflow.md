@@ -223,6 +223,11 @@ orchestrator never loads that content into its own context:
 } > scratch/T014-review.md
 ```
 
+For a per-phase review — the cadence for mechanical phases — the recipe
+is the same, just wider: `git diff <first phase commit>^..HEAD` in
+place of `git diff`, every task line in the phase, and each plan
+section they implement.
+
 A reviewer with the whole question in front of it has no reason to go
 looking, which is a stronger constraint than telling it not to. The
 invocation then names the bundle and nothing else:
@@ -236,6 +241,9 @@ Scope by invocation type:
 
 - **Per-task review** (foundational phases): the bundle, plus
   `CLAUDE.md` it already has. Nothing else.
+- **Per-phase review** (mechanical phases): the phase bundle, same
+  rule. A phase-end review of well-specified work is a transcription
+  check across several tasks, not a judgment call.
 - **Plan/tasks sign-off**: `spec.md`, `CLAUDE.md`, and the draft
   `plan.md`/`tasks.md` — plus, for a project with shipped code, only
   the existing files the plan claims to extend or depend on.
@@ -245,13 +253,15 @@ Scope by invocation type:
 
 **Tier by invocation type.** The reviewer's definition defaults to one
 tier below the orchestrator (`model: opus`), which is right for
-per-task reviews — narrow checks of a diff against its plan section,
-and the frequent case. Override up to the orchestrator's own tier for
+per-task and per-phase reviews — checks of a diff against the plan
+sections it implements, and the frequent case. Override up to the
+orchestrator's own tier for
 the invocations where the reviewer is exercising judgment rather than
 checking transcription: plan/tasks sign-off, the pre-merge sweep, and
 reviews of routine-but-real decisions from Step 3. Those happen a few
-times per spec; per-task reviews happen on every foundational task.
-The default should be the frequent case, because forgetting to
+times per spec; per-task and per-phase reviews happen on every
+foundational task and every mechanical phase. The default should be the
+frequent case, because forgetting to
 override up costs a lesser review while forgetting to override down
 costs the budget.
 

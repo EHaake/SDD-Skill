@@ -113,4 +113,5 @@ settled. Drop this section once a project has that answer. -->
 |---|---|---|---|
 | T001 | [opus] | [...] | verified first try |
 | T001 review | [opus] | [...] | signed off; scope statement matched the bundle |
+| Phase 2 review | [opus] | [...] | signed off; phase bundle |
 | plan sign-off | [top tier] | [...] | fix and re-review ×1, then signed off |

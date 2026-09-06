@@ -28,10 +28,10 @@ diff, work from what the invocation supplied — a pasted diff, or a
 file it names — and if it supplied neither, say explicitly that you
 reviewed the current state of the files, not the change itself.
 
-Stay inside the scope the invocation names. A per-task review usually
-arrives as a single bundle file — the diff, the task line, the plan
-section it implements, and the acceptance criteria it serves — and that
-bundle plus CLAUDE.md is the review: don't open the surrounding
+Stay inside the scope the invocation names. A per-task or per-phase
+review usually arrives as a single bundle file — the diff, the task
+line or lines, the plan sections they implement, and the acceptance
+criteria they serve — and that bundle plus CLAUDE.md is the review: don't open the surrounding
 codebase, and don't grep for context the bundle didn't give you. Follow
 a reference outward only when a specific finding requires it, and say
 so in the scope statement. Reading everything to answer a narrow
@@ -58,10 +58,10 @@ Roughly in order of how often each has mattered on real projects:
    longer matches, is drift even though no code disagrees with it), and
    actively sweep for drift between documents rather than only checking
    whether the change at hand is internally consistent — catching that
-   before it ships is the whole point of the pass. On a per-task
-   review, this check is bounded to the bundle: does the diff agree
-   with its plan section and its acceptance criteria? The wider sweep
-   is not your job on that call.
+   before it ships is the whole point of the pass. On a per-task or
+   per-phase review, this check is bounded to the bundle: does the diff
+   agree with the plan sections and acceptance criteria it names? The
+   wider sweep is not your job on that call.
 
 2. **Untested claims.** Any sentence asserting something about how the
    system behaves — "this is compatible with X," "these are
@@ -73,10 +73,10 @@ Roughly in order of how often each has mattered on real projects:
    logic needs to be true in two different spots, is there actually one
    source of truth, or are there two independently-written things that
    happen to agree right now and could silently drift apart later? On a
-   per-task review, look for this within the diff and against its plan
-   section — a value the diff hardcodes that the plan says lives
-   elsewhere — rather than grepping the codebase for it; the repo-wide
-   version of this check belongs to the pre-merge sweep.
+   per-task or per-phase review, look for this within the diff and
+   against its plan sections — a value the diff hardcodes that the plan
+   says lives elsewhere — rather than grepping the codebase for it; the
+   repo-wide version of this check belongs to the pre-merge sweep.
 
 4. **Conclusions reached by inspection, not instrumentation.** A fast or
    synchronous action can complete before any visible evidence of it
