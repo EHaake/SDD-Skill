@@ -147,24 +147,46 @@ orchestrates. Per task:
 1. Step 1 triage, as above. Routine → dispatch. Not routine → Plan Mode
    and the subagent at the top tier until what remains is
    transcription; then dispatch that.
-2. Dispatch to `sdd-implementer` with a packet: the task line, the
-   `plan.md` section, the `spec.md` acceptance criteria, the files
-   involved, the file whose pattern to copy, and any not-yet-recorded
-   finding from earlier tasks the implementer needs.
+2. Assemble a task bundle with shell — the same move as the review
+   bundle, so the content never enters the orchestrator's context —
+   and dispatch `sdd-implementer` on it. The bundle carries the task
+   line, the `plan.md` section, the `spec.md` acceptance criteria, the
+   files to touch, the file whose pattern to copy, and any recorded
+   finding from earlier tasks that bears on this one:
 
-   > "Implement T014 from specs/004-search/tasks.md. Plan section:
-   > plan.md §Data model. Acceptance criteria: spec.md 3 and 4. Touches
-   > Models/SearchIndex.swift and its tests; copy the pattern in
-   > Models/ItemStore.swift. Report per your definition."
+   ```
+   { echo "## Task";                grep -n "T014" specs/004-search/tasks.md;
+     echo "## Plan section";        sed -n '/^## Data model/,/^## /p' specs/004-search/plan.md;
+     echo "## Acceptance criteria"; sed -n '/^<criteria heading>/,/^## /p' specs/004-search/spec.md;
+     echo "## Files";               echo "Models/SearchIndex.swift and its tests; pattern: Models/ItemStore.swift";
+   } > scratch/T014-task.md
+   ```
 
-3. On return: re-run the build and tests yourself. Foundational task →
-   assemble the review bundle with shell and invoke the
-   skeptical-reviewer on it at its default tier (see "Keeping reviews
-   cheap"). Read the diff yourself only if something failed.
-4. Commit, check the box in `tasks.md`, record findings in `plan.md` or
+   > "Implement T014. Your bundle is scratch/T014-task.md — task, plan
+   > section, acceptance criteria, files, pattern file. Don't read
+   > plan.md, spec.md, or tasks.md in full. Report per your definition."
+
+   The implementer's "read beyond the bundle" list in its report is how
+   you learn what the next bundle should have named.
+3. On return, in a foundational phase: re-run the constitution's
+   verification command yourself — the filtered one, never a raw build
+   — then assemble the review bundle and invoke the skeptical-reviewer
+   at its default tier (see "Keeping reviews cheap"). In a mechanical
+   phase the implementer's verbatim filtered output is the
+   verification, and the phase review is the check. Read the diff
+   yourself only if something failed.
+4. If the reviewer says fix and re-review: dispatch the fix (the
+   findings plus the task bundle), then one re-review scoped to the
+   findings and the fix diff — and that is the end of the loop. One
+   review, at most one re-review, per task. Anything still open after
+   the re-review goes in the tier log and is left to the pre-merge
+   sweep, not sent around again. An unbounded loop was the single
+   largest cost in the first measured spec: a cold reviewer re-reading
+   a whole task diff finds a new objection every round.
+5. Commit, check the box in `tasks.md`, record findings in `plan.md` or
    `tasks.md` now. You are the only writer of `tasks.md` and the only
    one who commits.
-5. Escape hatch: two failed verifications, or a "stopped" report on
+6. Escape hatch: two failed verifications, or a "stopped" report on
    something you consider well-specified → do the task yourself at the
    top tier and log the miss in the tier log.
 
@@ -172,6 +194,13 @@ One task at a time. The implementer's "stopped on a judgment call"
 report is the cheapest escalation in the whole workflow — it costs one
 subagent run — so treat it as the system working, not as a failure to
 route around.
+
+**Start a fresh orchestrator session at each phase pause.** Otherwise
+the orchestrator's context accumulates every report, every verification
+output, and every bundle of the whole spec, all at the top tier. The
+skill already resumes cold from the first unchecked task in `tasks.md`,
+so a new session per phase costs nothing, and the phase pause is the
+natural moment for it.
 
 ## After implementation, not just before
 
@@ -219,9 +248,13 @@ orchestrator never loads that content into its own context:
 { echo "## Task";                grep -n "T014" specs/004-search/tasks.md;
   echo "## Plan section";        sed -n '/^## Data model/,/^## /p' specs/004-search/plan.md;
   echo "## Acceptance criteria"; sed -n '/^<criteria heading>/,/^## /p' specs/004-search/spec.md;
-  echo "## Diff";                git diff;
+  echo "## Diff";                git add -A && git diff --cached;
 } > scratch/T014-review.md
 ```
+
+Stage first: plain `git diff` omits untracked files, and a bundle that
+misses a new file costs a whole extra round. Staging is harmless here —
+the orchestrator commits the task next anyway.
 
 For a per-phase review — the cadence for mechanical phases — the recipe
 is the same, just wider: `git diff <first phase commit>^..HEAD` in
@@ -244,26 +277,32 @@ Scope by invocation type:
 - **Per-phase review** (mechanical phases): the phase bundle, same
   rule. A phase-end review of well-specified work is a transcription
   check across several tasks, not a judgment call.
+- **Re-review**: the previous review's findings and the diff since that
+  review — not the whole task diff again. This is the one case where a
+  reviewer is handed prior findings on purpose: its job is to check
+  them, not to audit afresh.
 - **Plan/tasks sign-off**: `spec.md`, `CLAUDE.md`, and the draft
   `plan.md`/`tasks.md` — plus, for a project with shipped code, only
   the existing files the plan claims to extend or depend on.
-- **Pre-merge sweep**: the whole document set for that spec, by design.
-  This is the one invocation that's supposed to be broad, and it
-  happens once per spec.
+- **Pre-merge sweep**: the whole document set for that spec plus the
+  spec's full diff against main (`git diff main...HEAD`) — the
+  documents and the change, not the codebase. This is the one
+  invocation that's supposed to be broad, and it happens once per
+  spec; the first measured sweep read the codebase and cost more than
+  five tasks, which is what the documents-and-diff bound is for.
 
 **Tier by invocation type.** The reviewer's definition defaults to one
 tier below the orchestrator (`model: opus`), which is right for
 per-task and per-phase reviews — checks of a diff against the plan
 sections it implements, and the frequent case. Override up to the
-orchestrator's own tier for
-the invocations where the reviewer is exercising judgment rather than
-checking transcription: plan/tasks sign-off, the pre-merge sweep, and
-reviews of routine-but-real decisions from Step 3. Those happen a few
-times per spec; per-task and per-phase reviews happen on every
-foundational task and every mechanical phase. The default should be the
-frequent case, because forgetting to
-override up costs a lesser review while forgetting to override down
-costs the budget.
+orchestrator's own tier only where the reviewer is exercising judgment
+rather than checking transcription: plan/tasks sign-off and reviews of
+routine-but-real decisions from Step 3. The pre-merge sweep stays at
+the default tier — it's broad by design, which makes it the most
+expensive single invocation, and the orchestrator adjudicates its
+findings at the top tier anyway. The default should be the frequent
+case, because forgetting to override up costs a lesser review while
+forgetting to override down costs the budget.
 
 **Log it.** The subagent's return reports its token usage. Record each
 reviewer invocation in the spec's tier log alongside the implementer

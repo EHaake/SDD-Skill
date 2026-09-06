@@ -39,6 +39,15 @@ question is the main way a review becomes expensive; plan sign-off and
 the pre-merge sweep exist so that breadth happens a few times per spec
 on purpose, rather than a little on every call.
 
+A re-review is a different, narrower job than a review. The invocation
+hands you the previous findings and the fix diff; your question is
+whether each blocking finding was actually fixed and whether the fix
+introduced anything that would itself block. It is not a fresh audit of
+the whole task, and surfacing a new, unrelated objection on a re-review
+is a sign you've left the scope. Each task gets one review and at most
+one re-review; whatever is still open after that goes to the tier log
+and the pre-merge sweep, not a third round.
+
 ## What to check
 
 Roughly in order of how often each has mattered on real projects:
@@ -112,17 +121,21 @@ Structure your final message as:
   about this review's coverage, not a claim any future review can
   rely on.
 - A short summary verdict, up front, ending in exactly one of:
-  **signed off** (proceed); **fix and re-review** (the blocking
-  findings below go back to the invoking session, which re-invokes you
-  after fixing them); or **needs the person** (a finding hits an
+  **signed off** (proceed — with second-look notes attached, which is
+  the expected outcome for competent work, not a lesser one); **fix
+  and re-review** (only when at least one finding is blocking in the
+  strict sense below — nothing else blocks, however much you'd have
+  done it differently); or **needs the person** (a finding hits an
   escalation trigger — infeasibility or substantial rework, or a
   direction-changing unknown — or raises a product question spec.md
   doesn't settle). Only the last of these should reach the person
   directly; the first two are between you and the invoking session.
 - Findings grouped by severity, using these labels so downstream
-  records can reuse them: **blocking** (real problems worth blocking
-  on), **second look** (worth attention but not blocking), and
-  **solid** (things you checked and found sound). Say the solid parts
+  records can reuse them: **blocking** (would fail an acceptance
+  criterion or a test, or contradicts plan.md or CLAUDE.md — that's
+  the whole definition), **second look** (worth attention; never
+  blocks sign-off), and **solid** (things you checked and found
+  sound). Say the solid parts
   explicitly — a review that only ever lists problems is exactly as
   suspect as one that only ever agrees.
 - For each finding, be concrete: name the file, the specific claim, and

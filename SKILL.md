@@ -270,22 +270,31 @@ How the loop runs, per task, in the orchestrating session:
    file whose pattern to copy. Findings from earlier tasks that aren't
    yet written down go in the packet too — or better, get written down
    first.
-3. **Verify by running, not by reading.** When the implementer
-   returns, re-run the build and tests yourself; on a foundational
-   task, assemble a review bundle with shell (diff, task line, plan
-   section, acceptance criteria) and invoke the reviewer on that alone.
-   Open the diff yourself only when verification fails.
-   This rule is what makes the savings real: if the orchestrator reads
-   every diff in full at the top tier, the work has been paid for
-   twice.
-4. **Commit, check the box, record findings.** The orchestrator is the
+3. **Verify by running the verification command, not by reading.**
+   The constitution names one filtered build-and-test command; the
+   implementer runs it and reports its output verbatim. In a
+   foundational phase the orchestrator re-runs it, then assembles a
+   review bundle with shell (diff, task line, plan section, acceptance
+   criteria) and invokes the reviewer on that alone; in a mechanical
+   phase the implementer's output is the verification and the phase
+   review is the check. Open the diff yourself only when something
+   failed. If the orchestrator reads every diff in full at the top
+   tier, the work has been paid for twice.
+4. **One review, at most one re-review, per task.** The re-review sees
+   the findings and the fix diff, nothing more, and whatever is still
+   open after it goes to the tier log and the pre-merge sweep. Blocking
+   is defined narrowly — would fail an acceptance criterion or a test,
+   or contradicts the plan or constitution — and nothing else blocks.
+5. **Commit, check the box, record findings.** The orchestrator is the
    only writer of `tasks.md` and the only one who commits — a commit
    means orchestrator-verified. Findings from the report go into
    `plan.md` or `tasks.md` now, not later, since the next implementer
    won't have seen them otherwise.
-5. **Sequential, one task at a time.** Commit-per-task and shared files
-   make parallel implementers messy; parallel dispatch is a deliberate
-   opt-in for a later day, not the default.
+6. **Sequential, one task at a time, and a fresh orchestrator session
+   each phase.** Commit-per-task and shared files make parallel
+   implementers messy; parallel dispatch is a deliberate opt-in for a
+   later day, not the default. The per-phase session keeps the
+   top-tier context from accumulating the whole spec.
 
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
@@ -303,14 +312,26 @@ copies, and a small footprint. Leave it off until a project's first
 spec under this policy shows Opus dispatch working, then turn it on in
 that project's `CLAUDE.md` if the numbers justify it.
 
-**Treat the first spec as the experiment.** The subagent's return
-reports its token usage; log it per task in `tasks.md`'s tier log,
-alongside any escape-hatch misses, and compare the spec's total against
-a previous spec of similar size before treating the policy as settled.
-The structural case for savings — cheaper rates on the bulk of the
-work, and small fresh contexts instead of one that accumulates every
-task — is strong, but it's an argument, not a measurement, until a
-project has measured it.
+**Measure it — the first measurement went the wrong way.** The
+subagent's return reports its token usage; log it per invocation in
+`tasks.md`'s tier log, alongside any escape-hatch misses, and compare
+the spec's total (from `ccusage session` afterward — the orchestrator
+can't see its own usage) against a previous spec of similar size. The
+first specs measured under this policy cost *more* than the
+single-session regime, not less, for reasons that are now rules above:
+an unbounded fix-and-re-review loop in which a cold reviewer found a
+new objection every round (over half of one spec's subagent tokens sat
+in four tasks' loops); implementers and the orchestrator ingesting raw
+build logs; the orchestrator re-running every verification at the top
+tier; a whole-codebase sweep at the top tier; and one orchestrator
+session accumulating the entire spec. The loop cap, the bundles, the
+verification command, the sweep bound, and the per-phase session are
+the response. If a spec measured under those still loses to the
+single-session regime on the top-tier budget, roll the implementer
+layer back and keep only the reviewer changes: the structural argument
+for dispatch — cheaper rates on the bulk of the work, small fresh
+contexts — holds only while the coordination overhead stays smaller
+than what it replaces.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
@@ -318,10 +339,11 @@ involvement level. The two are orthogonal — a product owner never sees
 any of this — but both are decide-once-at-the-start settings, and they
 belong together. The skeptical-reviewer's definition defaults to one
 tier down (`model: opus`), the right tier for its frequent per-task and
-per-phase checks; the orchestrator overrides it up for sign-off, the
-sweep, and decision reviews. See "Keeping reviews cheap" in the
-collaboration workflow for the reasoning, and for the bundle that keeps
-those reviews from reading the codebase at all.
+per-phase checks and for the pre-merge sweep; the orchestrator
+overrides it up for sign-off and decision reviews only. See "Keeping
+reviews cheap" in the collaboration workflow for the reasoning, and for
+the bundles that keep every review — and every implementer dispatch —
+from reading the codebase at all.
 
 ## Principles worth generalizing
 

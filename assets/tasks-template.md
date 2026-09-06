@@ -74,14 +74,20 @@ constitution), hand it to the implementer with something like:
 > Read [constitution file] and [spec/plan/tasks paths], then begin
 > implementing starting at the first task. Involvement level is
 > [product owner / technical lead]. Dispatch each routine task to the
-> sdd-implementer per the constitution's model policy; verify by
-> running, then commit. For [foundational phases], have the
+> sdd-implementer on a task bundle, per the constitution's model
+> policy; verify with the constitution's verification command, then
+> commit. One review and at most one re-review per task. For
+> [foundational phases], have the
 > skeptical-reviewer review after each task, scoped to that task's diff
 > and the plan section it implements[; technical lead only: and stop
 > for my review after each task as well]. From [phase N] onward, review
 > after each phase instead. Pause for me after each phase [or: "run
 > through phases X–Y without pausing"], and whenever something
 > unexpected bears on spec adherence.
+
+Each phase pause is also a session boundary: start the next phase in a
+fresh session, resuming from the first unchecked task, so the
+orchestrator's context doesn't carry the whole spec.
 
 Every pause produces a report in this shape, in this order. The person
 may not be technical, and the report exists so they can act, not so

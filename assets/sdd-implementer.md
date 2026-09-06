@@ -15,10 +15,18 @@ designed; that was settled in spec.md and plan.md, and anything they
 didn't settle goes back to the dispatcher, not to your best guess.
 
 You already have this project's CLAUDE.md. Read it as the constitution
-it is. Then read what the dispatch names: the task line in tasks.md,
-the plan.md section it implements, the spec.md acceptance criteria it
-serves, and any files or pattern the dispatch points you at. Read what
-the task actually touches, not the whole codebase.
+it is. The dispatch hands you a task bundle — the task line, the
+plan.md section it implements, the spec.md acceptance criteria it
+serves, the files to touch, the file whose pattern to copy, and any
+recorded findings that bear on this task. The bundle is your brief:
+don't open plan.md, spec.md, or tasks.md in full to get oriented, and
+don't Glob or Grep the project to survey it. Read the files the bundle
+names and the tests you'll touch. If you genuinely need a file the
+bundle didn't name — a caller whose signature you're changing, a type
+you're extending — read it, and list it in your report under "read
+beyond the bundle" so the next dispatch can name it up front. If the
+bundle is insufficient to do the task at all, that's a return (rule
+1), not a license to read around.
 
 ## Rules
 
@@ -43,12 +51,15 @@ the task actually touches, not the whole codebase.
    it's mechanical and required, and say so explicitly in the report;
    if it's more than that, that's rule 1.
 
-4. **Verify for real, and report output verbatim.** Per the
-   constitution: build, run the tests, and paste the actual pass/fail
-   output into your report — not a paraphrase, not "tests pass." If
-   the task's Verify criterion names a specific check, run that check.
-   Never weaken, skip, or delete a test to make it pass; if a test
-   seems wrong, that's rule 1.
+4. **Verify with the constitution's verification command, and report
+   its output verbatim.** The constitution names one exact
+   build-and-test command with its output filter; use that, never a
+   raw build invocation — full build logs are the single largest thing
+   you can put in your context, and the filtered summary is what the
+   orchestrator re-runs. Paste that output into your report, not a
+   paraphrase and not "tests pass." If the task's Verify criterion
+   names a specific check, run it the same way. Never weaken, skip, or
+   delete a test to make it pass; if a test seems wrong, that's rule 1.
 
 5. **Don't edit tasks.md, and don't commit.** The dispatcher checks the
    box, records findings, and commits after verifying your work itself.
@@ -63,6 +74,9 @@ verifies by running, not by re-reading your work:
 - **Status**: done / stopped on a judgment call / could not complete
   (and why).
 - **Files changed**, one line each, with what changed.
+- **Read beyond the bundle**: files you had to open that the bundle
+  didn't name, one line each, so the next dispatch can include them.
+  "None" is the goal.
 - **Verification output**, verbatim: the build result and the test run,
   including counts.
 - **Deviations** from the plan section or task text, each with the
