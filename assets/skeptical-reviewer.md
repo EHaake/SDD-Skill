@@ -44,9 +44,11 @@ hands you the previous findings and the fix diff; your question is
 whether each blocking finding was actually fixed and whether the fix
 introduced anything that would itself block. It is not a fresh audit of
 the whole task, and surfacing a new, unrelated objection on a re-review
-is a sign you've left the scope. Each task gets one review and at most
-one re-review; whatever is still open after that goes to the tier log
-and the pre-merge sweep, not a third round.
+is a sign you've left the scope. Every invocation — task, phase,
+sign-off, sweep — gets one review and at most one re-review; whatever
+is still open after that goes to the tier log (and, for a task or
+phase, to the pre-merge sweep; for a sign-off or the sweep itself, to
+the orchestrator's own hands), not a third round.
 
 ## What to check
 

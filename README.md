@@ -30,6 +30,8 @@ assets/
                                  active copy actually lives
   sdd-implementer.md            Source copy of the implementer subagent
                                  — same install location as the reviewer
+  sdd-planner.md                Source copy of the planner subagent —
+                                 same install location
 references/
   collaboration-workflow.md     Full step-by-step version of the
                                  routine/subagent/escalate triage
@@ -52,10 +54,11 @@ this machine) or a project-level `.claude/skills/spec-driven-development/`
 (that one repo only). Copy `SKILL.md`, `assets/`, and `references/` there
 directly — same folder structure as this repo, just at that path instead.
 
-The two subagent definitions are a separate copy: `assets/
-skeptical-reviewer.md` and `assets/sdd-implementer.md` go to
-`~/.claude/agents/` (user-level, every project on this machine). Claude
-Code reads them from there, not from inside the skill folder.
+The three subagent definitions are a separate copy:
+`assets/skeptical-reviewer.md`, `assets/sdd-implementer.md`, and
+`assets/sdd-planner.md` go to `~/.claude/agents/` (user-level, every
+project on this machine). Claude Code reads them from there, not from
+inside the skill folder.
 
 Verify it's actually recognized, not just present: open Claude Code
 anywhere and ask what skills are available.

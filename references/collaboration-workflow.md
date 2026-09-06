@@ -8,14 +8,14 @@ document afterward, not something to improvise around silently.
 
 ## One-time setup
 
-1. Place both agent definitions from this skill's `assets/` folder —
-   `skeptical-reviewer.md` and `sdd-implementer.md` — in
-   `~/.claude/agents/`, the user-level directory, so they're available
-   in every project automatically, not just the one they were first
-   set up in.
+1. Place the three agent definitions from this skill's `assets/`
+   folder — `skeptical-reviewer.md`, `sdd-implementer.md`, and
+   `sdd-planner.md` — in `~/.claude/agents/`, the user-level directory,
+   so they're available in every project automatically, not just the
+   one they were first set up in.
 2. In any Claude Code session, confirm they're recognized: ask "what
-   subagents do you have available?" or equivalent, and check both
-   `skeptical-reviewer` and `sdd-implementer` appear.
+   subagents do you have available?" or equivalent, and check all
+   three appear.
 3. Done. They never need to be recreated per project.
 
 If a specific project wants its own customized version of either
@@ -137,6 +137,43 @@ This is meant to be rare per project — reserved for what would already
 earn the tightest review tier, not a routine step. If it's happening for
 most tasks, something in Step 1's triage is being applied too
 conservatively.
+
+## Drafting plan.md and tasks.md: the planner
+
+Once shipped code is what plans extend (see the skill's authorship
+section), the orchestrating session doesn't draft `plan.md` and
+`tasks.md` itself — it dispatches `sdd-planner`, once per spec, at its
+own tier. The exploration a plan needs is the expensive part of
+planning; it belongs in a discardable context bounded by a planning
+bundle, not in the session that then carries it through every
+sign-off round and into implementation:
+
+```
+{ echo "## Spec";                    cat specs/005-export/spec.md;
+  echo "## Pattern: previous plan";  cat specs/004-search/plan.md;
+  echo "## Pattern: previous tasks"; cat specs/004-search/tasks.md;
+  echo "## Files";                   git ls-files <source dirs>;
+} > scratch/005-planning.md
+```
+
+> "Draft plan.md and tasks.md for specs/005-export. Your bundle is
+> scratch/005-planning.md: the spec, the previous spec's plan and
+> tasks as the pattern, and the file listing. Read the code the spec
+> touches, not the project. Write the two files to specs/005-export/
+> marked Draft; don't commit. Report per your definition."
+
+On return: commit the drafts to the spec branch with the PR still in
+draft, log the planner's tokens in the tier log's planning rows, then
+the sign-off — the skeptical-reviewer at the top tier on `spec.md`,
+`CLAUDE.md`, the drafts, and only the existing files the plan claims to
+extend. One sign-off and at most one re-review, like every other
+invocation; a blocking finding still open after that is fixed by the
+orchestrator directly and logged, not sent around a third time. Then
+the spec-conformance summary to the person (product-owner level), or
+the drafts themselves (technical lead).
+
+A first spec, with no code to plan against, has no planner: the plan is
+drafted in chat, per the authorship phase transition.
 
 ## The dispatch loop: who does the typing
 

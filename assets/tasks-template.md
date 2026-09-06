@@ -1,7 +1,10 @@
 # Tasks: [Feature Name]
 
-**Status**: Draft — pending review
+**Status**: Draft — pending sign-off
 **Implements**: plan.md in this directory
+**Foundational phases**: [0–1] — per-task reviewer cadence; later
+phases are per-phase. State this; an orchestrator left to guess
+guesses "all of them."
 
 <!-- Before filling this in: the skill's "Building tasks.md" section has
 the actual methodology — the "Verify:" criterion pattern, dependency-
@@ -117,7 +120,9 @@ has that answer. -->
 
 | Task / invocation | Tier | Tokens | Outcome / miss reason |
 |---|---|---|---|
+| Planning: draft (`sdd-planner`) | [top tier] | [...] | plan.md + tasks.md drafted; foundational phases 0–1 |
+| Planning: sign-off | [top tier] | [...] | fix and re-review ×1, then signed off |
 | T001 | [opus] | [...] | verified first try |
 | T001 review | [opus] | [...] | signed off; scope statement matched the bundle |
 | Phase 2 review | [opus] | [...] | signed off; phase bundle |
-| plan sign-off | [top tier] | [...] | fix and re-review ×1, then signed off |
+| Pre-merge sweep | [opus] | [...] | signed off; documents + spec diff |

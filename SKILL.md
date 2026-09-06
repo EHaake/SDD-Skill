@@ -43,9 +43,10 @@ resume cold than one that doesn't.
   as ground truth. It should be reading `CLAUDE.md` at the start of every
   session and treating `spec.md`/`plan.md`/`tasks.md` as the actual
   source of truth for what's being built — not the chat history. Once
-  shipped code exists, it also drafts `plan.md` and `tasks.md` in Plan
-  Mode, since at that point the ground truth a plan extends lives where
-  only it can see. During implementation it orchestrates rather than
+  shipped code exists, it also drafts `plan.md` and `tasks.md` — through
+  the `sdd-planner` subagent, one dispatch per spec — since at that
+  point the ground truth a plan extends lives where only it can see.
+  During implementation it orchestrates rather than
   types: each routine task is dispatched to the `sdd-implementer`
   subagent one tier down, and the main session triages, verifies, and
   commits (see "Model tiering" below).
@@ -60,7 +61,8 @@ every pause. Two levels:
   where most of their involvement lives — attests to behavior by using
   the app at phase pauses, and decides the two escalation triggers.
   They never approve technical work: `plan.md` and `tasks.md` are
-  signed off by Plan Mode plus the skeptical-reviewer, and foundational
+  drafted by the sdd-planner and signed off by the skeptical-reviewer,
+  and foundational
   tasks are reviewed by the skeptical-reviewer rather than by the
   person. What reaches them is a spec-conformance summary, not an
   architecture review.
@@ -233,8 +235,9 @@ cheap" in `references/collaboration-workflow.md`.
 ## Model tiering: decisions at the top tier, execution one tier down
 
 The best available model does everything that involves a real
-decision: the spec conversation, plan and task drafting, Step 1 triage,
-orchestration of implementation, and the skeptical-reviewer when it's
+decision: the spec conversation, plan and task drafting (the
+`sdd-planner`, one dispatch per spec), Step 1 triage, orchestration of
+implementation, and the skeptical-reviewer when it's
 judging a decision (sign-off, the pre-merge sweep, routine-but-real
 reviews). The reviewer's per-task checks in foundational phases and
 per-phase checks in mechanical ones — a diff against the plan sections
@@ -547,10 +550,18 @@ subtly stale and drifts from there. The workaround is a relay: Claude
 Code prints state into chat, chat authors the plan against the paste, a
 transcription layer whose only function is preserving a rule written
 for a condition that no longer holds. Instead, once `spec.md` is
-approved: Claude Code drafts `plan.md` and `tasks.md` in Plan Mode,
-with the skeptical-reviewer applied to non-routine technical calls per
-the collaboration workflow, and commits them to the spec branch with
-the PR still in draft.
+approved: the orchestrating session assembles a planning bundle with
+shell — the spec, the previous spec's `plan.md` and `tasks.md` as the
+pattern, a file listing — and dispatches the `sdd-planner` subagent
+(`assets/sdd-planner.md`) on it, once, at its own tier. The planner
+reads the code the spec touches, writes both files marked Draft, and
+returns a summary with its token usage for the tier log. The
+orchestrator commits the drafts to the spec branch with the PR still in
+draft, and the skeptical-reviewer signs off. The exploration a plan
+needs is the expensive part of planning, and this puts it in a
+discardable context, bounded by the bundle, instead of in the session
+that then carries it through every sign-off round and into
+implementation.
 
 **`spec.md` stays in chat in both phases.** It captures product intent,
 user-facing behavior, and decisions — the design conversation's actual
@@ -560,10 +571,11 @@ job — and needs no repo access to write well.
 the levels differ materially.** At the technical-lead level, the person
 reads and approves `plan.md` and `tasks.md` before any implementation
 task starts, in either authorship phase — drafting relocated; approval
-didn't. At the product-owner level, Plan Mode plus the
-skeptical-reviewer is the gate: the reviewer checks the draft against
-`spec.md` and `CLAUDE.md`, blocking findings go back to the drafting
-session to be fixed and re-reviewed, and the person receives a
+didn't. At the product-owner level, the planner's draft plus the
+skeptical-reviewer's sign-off is the gate: the reviewer checks the
+draft against `spec.md` and `CLAUDE.md`, blocking findings go back to
+the orchestrator to be fixed and re-reviewed once, and the person
+receives a
 **spec-conformance summary** rather than the plan itself — which
 acceptance criteria the plan serves and how, where it deviates from the
 spec and why, and any product question it surfaced that needs their
@@ -665,8 +677,9 @@ spec" was never written with work-that-isn't-a-spec in mind.
 `assets/` has starting points for the four core documents —
 `CLAUDE-template.md`, `spec-template.md`, `plan-template.md`, and
 `tasks-template.md` — plus `design-brief-template.md` for projects with
-a UI, and two ready-to-use Claude Code subagent definitions:
-`skeptical-reviewer.md` and `sdd-implementer.md`. The document
+a UI, and three ready-to-use Claude Code subagent definitions:
+`skeptical-reviewer.md`, `sdd-implementer.md`, and `sdd-planner.md`.
+The document
 templates are skeletons with placeholders and inline guidance
 comments, not fill-in-the-blank forms — expect to restructure sections
 as the actual project's needs diverge from the template, the same way
