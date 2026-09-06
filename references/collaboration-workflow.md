@@ -343,7 +343,9 @@ forgetting to override down costs the budget.
 
 **Log it.** The subagent's return reports its token usage. Record each
 reviewer invocation in the spec's tier log alongside the implementer
-runs — invocation type, tier, tokens. The reviewer's scope statement,
+runs — invocation type, the resolved model name (`opus`, `fable` —
+never "default," which is a pointer that can change under the log),
+tokens. The reviewer's scope statement,
 the first line of its report, says what it actually read; if the
 tokens or the scope statement show it examining far more than the
 bundle, the invocation was too loose, and the log will show which

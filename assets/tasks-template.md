@@ -116,13 +116,16 @@ miss (a task the orchestrator had to redo at the top tier, and why),
 and, if the third tier is on, which tasks it took and whether they held
 up. Compare the spec's total against a previous spec of similar size
 before treating the policy as settled. Drop this section once a project
-has that answer. -->
+has that answer. The Tier column carries the resolved model name —
+`opus`, `fable` — never "default" or "top tier": a definition's default
+is a pointer that has already changed once, and a log entry has to
+stay true after it changes again. -->
 
 | Task / invocation | Tier | Tokens | Outcome / miss reason |
 |---|---|---|---|
-| Planning: draft (`sdd-planner`) | [top tier] | [...] | plan.md + tasks.md drafted; foundational phases 0–1 |
-| Planning: sign-off | [top tier] | [...] | fix and re-review ×1, then signed off |
-| T001 | [opus] | [...] | verified first try |
-| T001 review | [opus] | [...] | signed off; scope statement matched the bundle |
-| Phase 2 review | [opus] | [...] | signed off; phase bundle |
-| Pre-merge sweep | [opus] | [...] | signed off; documents + spec diff |
+| Planning: draft (`sdd-planner`) | fable | [...] | plan.md + tasks.md drafted; foundational phases 0–1 |
+| Planning: sign-off | fable | [...] | fix and re-review ×1, then signed off |
+| T001 | opus | [...] | verified first try |
+| T001 review | opus | [...] | signed off; scope statement matched the bundle |
+| Phase 2 review | opus | [...] | signed off; phase bundle |
+| Pre-merge sweep | opus | [...] | signed off; documents + spec diff |
