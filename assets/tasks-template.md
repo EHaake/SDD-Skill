@@ -2,9 +2,9 @@
 
 **Status**: Draft — pending sign-off
 **Implements**: plan.md in this directory
-**Foundational phases**: [0–1] — per-task reviewer cadence; later
-phases are per-phase. State this; an orchestrator left to guess
-guesses "all of them."
+**Foundational phases**: [0–1]. Review cadence is per-phase
+everywhere; a task marked `review: per-task` gets its own review as
+well. State both; an orchestrator left to guess guesses "all of them."
 
 <!-- Before filling this in: the skill's "Building tasks.md" section has
 the actual methodology — the "Verify:" criterion pattern, dependency-
@@ -36,11 +36,13 @@ not summarized.
 
 <!-- Foundational setup. Mistakes here are cheap to catch immediately
 and expensive to unwind later — this phase (and the data-model phase
-right after it) is where a per-task skeptical-reviewer pass is worth
-the cost, and, at the technical-lead level only, a per-task pause for
-the person. -->
+right after it) is where marking a task `review: per-task` is worth it
+for anything a dozen later files will depend on. Mark sparingly; the
+phase review covers the rest. At the technical-lead level, marked
+tasks also pause for the person. -->
 
 - [ ] **T001** — [...] *Verify: [concrete, checkable outcome].*
+  *review: per-task*
 
 ## Phase 1 — [Data model / core architecture]
 
@@ -48,10 +50,9 @@ the person. -->
 
 ## Phase 2 onward — [feature work, roughly in dependency order]
 
-<!-- Once the foundation is solid, review cadence can relax to per-phase
-rather than per-task — a wrong view or a wrong CRUD field is cheap to
-fix after the fact. Re-tighten around anything that turns out to be a
-genuine judgment call, even mid-phase. -->
+<!-- Per-phase review here as everywhere — a wrong view or a wrong CRUD
+field is cheap to fix after the fact. Re-tighten around anything that
+turns out to be a genuine judgment call, even mid-phase. -->
 
 ## Final phase — Spec close-out
 
@@ -79,18 +80,17 @@ constitution), hand it to the implementer with something like:
 > [product owner / technical lead]. Dispatch each routine task to the
 > sdd-implementer on a task bundle, per the constitution's model
 > policy; verify with the constitution's verification command, then
-> commit. One review and at most one re-review per task. For
-> [foundational phases], have the
-> skeptical-reviewer review after each task, scoped to that task's diff
-> and the plan section it implements[; technical lead only: and stop
-> for my review after each task as well]. From [phase N] onward, review
-> after each phase instead. Pause for me after each phase [or: "run
-> through phases X–Y without pausing"], and whenever something
-> unexpected bears on spec adherence.
+> commit. One review and at most one re-review per invocation. Have
+> the skeptical-reviewer review after each phase with a phase bundle;
+> tasks marked review: per-task get their own review as well[;
+> technical lead only: and a pause for me after each marked task].
+> Pause for me after each phase [or: "run through phases X–Y without
+> pausing"], and whenever something unexpected bears on spec
+> adherence.
 
-Each phase pause is also a session boundary: start the next phase in a
-fresh session, resuming from the first unchecked task, so the
-orchestrator's context doesn't carry the whole spec.
+Each phase pause is also where the carried context gets dropped:
+compact, or start the next phase in a fresh session — either is fine —
+resuming from the first unchecked task.
 
 Every pause produces a report in this shape, in this order. The person
 may not be technical, and the report exists so they can act, not so

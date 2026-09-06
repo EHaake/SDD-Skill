@@ -59,16 +59,16 @@ other. The skill's default is product owner. -->
 **Product owner.** The person owns `spec.md`, attests to behavior by
 using the app at phase pauses, and decides escalations. They do not
 approve technical work: `plan.md` and `tasks.md` are drafted by the
-`sdd-planner` and signed off by the `skeptical-reviewer`, foundational
-tasks are reviewed by
+`sdd-planner` and signed off by the `skeptical-reviewer`, each phase
+(and any task the planner marked for its own review) is reviewed by
 the `skeptical-reviewer` rather than the person, and what reaches the
 person is a spec-conformance summary, not an architecture review.
 Implementation pauses after each phase unless the person says to run
 further, and whenever something unexpected bears on spec adherence.
 
 **Technical lead.** As above, but the person also reads and approves
-`plan.md` and `tasks.md`, and implementation pauses after every
-foundational task for their review.
+`plan.md` and `tasks.md`, and implementation pauses for their review
+after every task the planner marked `review: per-task`.
 
 ## Model policy
 
@@ -82,8 +82,8 @@ names as models change; the roles don't. -->
   decision — plan/tasks sign-off and reviews of routine-but-real
   decisions — via a per-call model override up from its default.
 - **The `skeptical-reviewer` runs one tier down by default** (its
-  definition says `opus`) for per-task reviews in foundational phases,
-  per-phase reviews in mechanical ones, and the pre-merge sweep. Each
+  definition says `opus`) for per-phase reviews, the per-task reviews
+  the planner marks, and the pre-merge sweep. Each
   review gets a single bundle file assembled with shell — diff, task
   lines, plan sections, acceptance criteria; for the sweep, the
   documents and the spec's full diff — and reads nothing else.
@@ -98,13 +98,19 @@ names as models change; the roles don't. -->
   session triages each task, dispatches routine ones on a task bundle
   assembled with shell (task line, plan section, acceptance criteria,
   files, the pattern file to copy), and on return verifies with the
-  verification command below — re-run by the orchestrator in
-  foundational phases, taken from the implementer's verbatim output in
-  mechanical ones — never by re-reading the diff. Only the orchestrator
-  edits `tasks.md` or commits.
-- **Fresh orchestrator session at each phase pause**, resuming from
-  the first unchecked task, so the top-tier context doesn't accumulate
-  the whole spec.
+  verification command below — re-run by the orchestrator for tasks
+  marked `review: per-task`, taken from the implementer's verbatim
+  output otherwise — never by re-reading the diff. Only the
+  orchestrator edits `tasks.md` or commits, and the orchestrator never
+  implements second-look notes or does device or browser checks by
+  hand.
+- **Drop the carried context at each phase pause** — compact or start
+  fresh, resuming from the first unchecked task — so the top-tier
+  context doesn't accumulate the whole spec.
+- **Fallback**: the top tier is the session's model. If its usage
+  budget runs out, switch the session to the step-down model for the
+  rest of the window; planner and sign-off follow it, nothing else
+  changes, and the tier log records what ran.
 - **Escape hatch**: two failed verifications on one task, or a "stopped
   on a judgment call" the orchestrator considers well-specified, and
   the orchestrator does that task itself at the top tier, noting the
@@ -182,8 +188,8 @@ report its actual output, not a paraphrase.
 A task is not complete until that output is green. Do not weaken, skip,
 or delete a test to make it pass — if a test seems wrong, flag it and
 ask. When the task was dispatched to the `sdd-implementer`, its verbatim
-output is the verification in mechanical phases; in foundational phases
-the orchestrator re-runs the command itself before committing.
+output is the verification; for a task marked `review: per-task` the
+orchestrator re-runs the command itself before committing.
 
 ## Git conventions
 

@@ -1,6 +1,6 @@
 ---
 name: skeptical-reviewer
-description: An independent, deliberately skeptical second opinion on a plan, a completed piece of work, or a contested technical claim. Invoke explicitly by name before committing to a foundational or high-stakes decision, and at the fixed checkpoints the collaboration workflow defines (plan/tasks sign-off, per-task review in foundational phases, the pre-merge sweep) — not for routine, well-specified tasks otherwise. Never self-triggering; the invoking session decides when.
+description: An independent, deliberately skeptical second opinion on a plan, a completed piece of work, or a contested technical claim. Invoke explicitly by name before committing to a foundational or high-stakes decision, and at the fixed checkpoints the collaboration workflow defines (plan/tasks sign-off, per-phase review, per-task review where the planner marked it, the pre-merge sweep) — not for routine, well-specified tasks otherwise. Never self-triggering; the invoking session decides when.
 tools: Read, Grep, Glob, WebSearch, WebFetch
 model: opus
 ---

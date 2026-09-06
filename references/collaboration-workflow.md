@@ -35,10 +35,11 @@ a spec's PR comes out of draft and merges — a whole-spec consistency
 sweep, not tied to any single task (see "After implementation" below).
 At the product-owner level, two more, because the reviewer is standing
 in for the person there: sign-off on `plan.md` and `tasks.md` before
-implementation starts, and a review after every task in a foundational
-phase. Those stand-in reviews are what let the person's own pauses drop
-to per-phase, and they're scoped tightly (see "Keeping reviews cheap"
-below) precisely so that cadence stays affordable.
+implementation starts, and a review after every phase — per task only
+for the tasks the planner marked `review: per-task`. Those stand-in
+reviews are what let the person's own pauses drop to per-phase, and
+they're scoped tightly (see "Keeping reviews cheap" below) precisely so
+that cadence stays affordable.
 
 ### Step 1 — Is this routine?
 
@@ -205,13 +206,17 @@ orchestrates. Per task:
 
    The implementer's "read beyond the bundle" list in its report is how
    you learn what the next bundle should have named.
-3. On return, in a foundational phase: re-run the constitution's
-   verification command yourself — the filtered one, never a raw build
-   — then assemble the review bundle and invoke the skeptical-reviewer
-   at its default tier (see "Keeping reviews cheap"). In a mechanical
-   phase the implementer's verbatim filtered output is the
-   verification, and the phase review is the check. Read the diff
-   yourself only if something failed.
+3. On return, for a task marked `review: per-task`: re-run the
+   constitution's verification command yourself — the filtered one,
+   never a raw build — then assemble the review bundle and invoke the
+   skeptical-reviewer at its default tier (see "Keeping reviews
+   cheap"). For every other task the implementer's verbatim filtered
+   output is the verification, and the phase review is the check. Read
+   the diff yourself only if something failed. Don't fold the
+   reviewer's second-look notes into the code yourself, and don't do
+   device or browser checks by hand — the first goes to the log or the
+   next bundle, the second is the implementer's Verify criterion or the
+   person's attestation.
 4. If the reviewer says fix and re-review: dispatch the fix (the
    findings plus the task bundle), then one re-review scoped to the
    findings and the fix diff — and that is the end of the loop. One
@@ -232,12 +237,12 @@ report is the cheapest escalation in the whole workflow — it costs one
 subagent run — so treat it as the system working, not as a failure to
 route around.
 
-**Start a fresh orchestrator session at each phase pause.** Otherwise
-the orchestrator's context accumulates every report, every verification
-output, and every bundle of the whole spec, all at the top tier. The
-skill already resumes cold from the first unchecked task in `tasks.md`,
-so a new session per phase costs nothing, and the phase pause is the
-natural moment for it.
+**Drop the carried context at each phase pause** — compact, or start
+a fresh session; either is fine. Otherwise the orchestrator's context
+accumulates every report, every verification output, and every bundle
+of the whole spec, all at the top tier. The skill already resumes cold
+from the first unchecked task in `tasks.md`, so neither costs anything
+real, and the phase pause is the natural moment.
 
 ## After implementation, not just before
 
@@ -309,11 +314,12 @@ invocation then names the bundle and nothing else:
 
 Scope by invocation type:
 
-- **Per-task review** (foundational phases): the bundle, plus
-  `CLAUDE.md` it already has. Nothing else.
-- **Per-phase review** (mechanical phases): the phase bundle, same
-  rule. A phase-end review of well-specified work is a transcription
-  check across several tasks, not a judgment call.
+- **Per-phase review** (every phase): the phase bundle, plus
+  `CLAUDE.md` it already has. Nothing else. A phase-end review of
+  well-specified work is a transcription check across several tasks,
+  not a judgment call.
+- **Per-task review** (only tasks the planner marked `review:
+  per-task`): the task bundle, same rule.
 - **Re-review**: the previous review's findings and the diff since that
   review — not the whole task diff again. This is the one case where a
   reviewer is handed prior findings on purpose: its job is to check
@@ -330,7 +336,7 @@ Scope by invocation type:
 
 **Tier by invocation type.** The reviewer's definition defaults to one
 tier below the orchestrator (`model: opus`), which is right for
-per-task and per-phase reviews — checks of a diff against the plan
+per-phase and per-task reviews — checks of a diff against the plan
 sections it implements, and the frequent case. Override up to the
 orchestrator's own tier only where the reviewer is exercising judgment
 rather than checking transcription: plan/tasks sign-off and reviews of

@@ -53,11 +53,12 @@ methodology behind it:
 2. Phases follow dependency, not feature grouping. Foundational work
    (data model, shared utilities) first, in its own phase; view models
    before the views that use them.
-3. **State which phases are foundational**, in the header line the
-   pattern has for it. This is not optional: it decides the reviewer's
-   cadence (per task in foundational phases, per phase after), and an
-   orchestrator left to guess guesses "all of them," which is the
-   expensive answer.
+3. **State which phases are foundational** in the header line the
+   pattern has for it, and **mark the individual tasks that warrant
+   their own review** with `review: per-task` — sparingly, for a task
+   whose mistake a dozen later files would inherit. The default is one
+   review per phase, everywhere; an orchestrator left to guess guesses
+   "all of them," which is the expensive answer.
 4. Shared components get one task, referenced by every screen that
    uses them, not rebuilt per screen.
 5. Each task names the files it touches and the existing file whose

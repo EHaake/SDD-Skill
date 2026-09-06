@@ -62,13 +62,15 @@ every pause. Two levels:
   the app at phase pauses, and decides the two escalation triggers.
   They never approve technical work: `plan.md` and `tasks.md` are
   drafted by the sdd-planner and signed off by the skeptical-reviewer,
-  and foundational
-  tasks are reviewed by the skeptical-reviewer rather than by the
-  person. What reaches them is a spec-conformance summary, not an
-  architecture review.
+  and each phase (and any task the planner marked for its own review)
+  is reviewed by the skeptical-reviewer rather than by the person. What
+  reaches them is a spec-conformance summary, not an architecture
+  review.
 - **Technical lead**. The person also reads and approves `plan.md` and
-  `tasks.md`, and implementation pauses after every foundational task
-  for their review — the original shape of this skill.
+  `tasks.md`, and implementation pauses for their review after every
+  task the planner marked `review: per-task` — the original shape of
+  this skill, with the per-task gate now the exception rather than the
+  rule for foundational phases.
 
 Everything below that mentions a review, an approval, or a pause is
 written for the product-owner level unless it says otherwise; the
@@ -210,27 +212,33 @@ model decision discovered three weeks later is not. Tier the review
 cadence by how expensive a mistake would be to unwind, not by a flat
 rule:
 
-- **Foundational, hard-to-reverse work** (data model, core architecture,
-  anything a dozen later files will depend on) — review after *every*
-  task.
-- **Mechanical, well-specified work** (CRUD following an established
-  pattern, a view matching a provided screenshot) — review after every
-  *phase* instead.
+- **Review after every phase**, with a phase bundle — the default
+  everywhere, foundational phases included. A foundational phase is
+  short by construction, so its review comes a day later rather than
+  the same afternoon, and the pre-merge sweep is still behind it.
+- **Per-task review only where the planner marks it** — a task whose
+  mistake would be genuinely expensive to unwind (a data-model contract
+  a dozen later files will depend on), flagged in `tasks.md` with
+  `review: per-task`. The exception, not a phase-wide rule.
 - Re-tighten around anything that turns out to be a genuine judgment
   call, even mid-phase, rather than treating the cadence as fixed once
   set.
 
-This tiering is the *reviewer's* cadence. At the product-owner level,
-every one of those reviews is a skeptical-reviewer pass, and none of
-them pauses for the person. The person's own pauses follow a different
-rule: after each phase (unless they've said to run further), and
-whenever something unexpected surfaces that bears on spec adherence. At
-the technical-lead level the foundational per-task reviews are the
-person's as well, which is where their pauses come from. Either way,
-the reviewer's per-task passes should be scoped tightly — the task's
-diff, the plan section it implements, the acceptance criteria it serves
-— not a fresh whole-codebase read each time; see "Keeping reviews
-cheap" in `references/collaboration-workflow.md`.
+This is the *reviewer's* cadence, and it used to be heavier: per task
+throughout foundational phases, a rule from when the person's attention
+was the scarce resource and a per-task look at foundational work cost
+nothing else. With a token-priced reviewer it did — on the first specs
+measured, review cost about twice the implementation it reviewed. At
+the product-owner level every one of these reviews is a
+skeptical-reviewer pass, and none of them pauses for the person. The
+person's own pauses follow a different rule: after each phase (unless
+they've said to run further), and whenever something unexpected
+surfaces that bears on spec adherence. At the technical-lead level the
+per-task reviews the planner marks are the person's as well. Either
+way, reviews are scoped to a bundle — the diff, the plan sections it
+implements, the acceptance criteria it serves — never a fresh
+whole-codebase read; see "Keeping reviews cheap" in
+`references/collaboration-workflow.md`.
 
 ## Model tiering: decisions at the top tier, execution one tier down
 
@@ -275,29 +283,38 @@ How the loop runs, per task, in the orchestrating session:
    first.
 3. **Verify by running the verification command, not by reading.**
    The constitution names one filtered build-and-test command; the
-   implementer runs it and reports its output verbatim. In a
-   foundational phase the orchestrator re-runs it, then assembles a
-   review bundle with shell (diff, task line, plan section, acceptance
-   criteria) and invokes the reviewer on that alone; in a mechanical
-   phase the implementer's output is the verification and the phase
-   review is the check. Open the diff yourself only when something
-   failed. If the orchestrator reads every diff in full at the top
-   tier, the work has been paid for twice.
+   implementer runs it and reports its output verbatim. For a task the
+   planner marked `review: per-task`, the orchestrator re-runs it, then
+   assembles a review bundle with shell (diff, task line, plan section,
+   acceptance criteria) and invokes the reviewer on that alone; for
+   every other task the implementer's output is the verification and
+   the phase review is the check. Open the diff yourself only when
+   something failed. If the orchestrator reads every diff in full at
+   the top tier, the work has been paid for twice.
 4. **One review, at most one re-review, per task.** The re-review sees
    the findings and the fix diff, nothing more, and whatever is still
    open after it goes to the tier log and the pre-merge sweep. Blocking
    is defined narrowly — would fail an acceptance criterion or a test,
    or contradicts the plan or constitution — and nothing else blocks.
-5. **Commit, check the box, record findings.** The orchestrator is the
-   only writer of `tasks.md` and the only one who commits — a commit
-   means orchestrator-verified. Findings from the report go into
-   `plan.md` or `tasks.md` now, not later, since the next implementer
-   won't have seen them otherwise.
-6. **Sequential, one task at a time, and a fresh orchestrator session
-   each phase.** Commit-per-task and shared files make parallel
-   implementers messy; parallel dispatch is a deliberate opt-in for a
-   later day, not the default. The per-phase session keeps the
-   top-tier context from accumulating the whole spec.
+5. **Commit, check the box, record findings — and nothing else by
+   hand.** The orchestrator is the only writer of `tasks.md` and the
+   only one who commits; a commit means orchestrator-verified. Findings
+   from the report go into `plan.md` or `tasks.md` now, not later,
+   since the next implementer won't have seen them otherwise. The
+   orchestrator does not implement the reviewer's second-look notes
+   itself, and does not do device, browser, or visual verification by
+   hand: second-look items go to the log or the next task's bundle, and
+   visual checks are the implementer's Verify criterion or the person's
+   attestation at the phase pause. On the first measured specs, "folded
+   in by the orchestrator" and "seen by the orchestrator" were
+   recurring log entries — each one the top-tier session doing work the
+   tiering exists to move off it.
+6. **Sequential, one task at a time, and drop the carried context at
+   each phase boundary.** Commit-per-task and shared files make
+   parallel implementers messy; parallel dispatch is a deliberate
+   opt-in for a later day, not the default. At a phase pause, compact
+   or start a fresh session — either is fine; the point is that the
+   top-tier context doesn't carry the whole spec.
 
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
@@ -335,6 +352,16 @@ layer back and keep only the reviewer changes: the structural argument
 for dispatch — cheaper rates on the bulk of the work, small fresh
 contexts — holds only while the coordination overhead stays smaller
 than what it replaces.
+
+**The top tier is the session's model, and that's also the fallback.**
+Nothing in the policy names a model: the planner and the sign-off
+inherit the session's model, and the implementer and reviewer default
+to the step-down alias. When the top tier's usage budget is exhausted,
+switch the session to the step-down model for the rest of the window —
+the planner and sign-off then run there too, nothing else changes, and
+the tier log records what actually ran. Check whether the client's
+model picker offers an automatic version of this before doing it by
+hand.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
