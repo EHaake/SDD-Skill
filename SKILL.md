@@ -376,8 +376,9 @@ sign-off dispatches for the rest of the window, and log what ran.
 after.** The idea conversation, the constitution, and the first spec
 happen in chat — there is no codebase yet, and chat is the top tier at
 the person's own setting. Every later spec conversation happens in
-Claude Code, in a session of its own that ends when the spec is
-approved — never inside an orchestrating session, whose context is the
+Claude Code, in a session of its own that ends — with a new session,
+not `/clear`, since a clear keeps the model — when the spec is
+approved; never inside an orchestrating session, whose context is the
 cost the tiering exists to contain. One constraint the skill can't
 design around: a session has one model, set at start, and this
 project's default is the step-down tier. So a spec session opens by
@@ -433,7 +434,7 @@ definitions and the orchestrator's overrides do the rest:
 | Step | Where | Model | Who's talking |
 |---|---|---|---|
 | Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Opus, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
-| Spec approved | `/clear` | — | — |
+| Spec approved | **new session** — not `/clear`, which keeps the session's model | — | — |
 | Plan and tasks drafted | Claude Code, new session | Opus session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
 | Sign-off | same session | `skeptical-reviewer` at **Fable, high**; one review, at most one re-review | orchestrator → reviewer |
 | Spec-conformance summary | same session | Opus | orchestrator → the person |
@@ -449,7 +450,12 @@ definitions and the orchestrator's overrides do the rest:
 session. The session prompts for it; it can't be automated, because a
 session has exactly one model and the project default is the step-down
 tier. Everything else resolves from `.claude/settings.json`, the agent
-frontmatter, and the orchestrator's overrides.
+frontmatter, and the orchestrator's overrides. Note the asymmetry:
+`/clear` resets context but keeps the session's model, which is right
+at a phase boundary (the session is already on the step-down tier) and
+wrong after a spec session (it would leave planning and orchestration
+on the top tier) — so a spec session ends with a new session, not a
+clear.
 
 **Fable's footprint per spec** is the spec conversation, one planner
 run, one sign-off (plus at most one re-review), and any routine-but-real

@@ -100,7 +100,8 @@ names as models change; the roles don't. -->
   agent definitions carry `effort: high`, which overrides the session's
   medium, so reasoning stays at full strength where it matters.
 - **Spec conversations happen in a Claude Code session of their own**,
-  at the top tier, and end when the spec is approved — never inside an
+  at the top tier, and end with a new session (not `/clear`, which
+  keeps the model) when the spec is approved — never inside an
   orchestrating session. A session in this repo opens at the step-down
   tier, so a spec session states its model first and, if it's the
   step-down tier, asks the person to switch to the top tier for this
