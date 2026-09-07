@@ -37,9 +37,9 @@ assets/
 references/
   collaboration-workflow.md     Full step-by-step version of the
                                  routine/subagent/escalate triage
-  model-tiering-rationale.md    Decision record: why the orchestrator
-                                 runs one tier down at medium effort,
-                                 and what would change that
+  design-record.md              Decision record: the reasoning and
+                                 history behind the skill's choices,
+                                 kept out of what every session loads
 ```
 
 `README.md` (this file) and `How-To-Use.md`, if you keep a copy here,

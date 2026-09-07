@@ -6,10 +6,9 @@ description: Guidance for running spec-driven development (SDD) on a software pr
 # Spec-Driven Development with Claude
 
 A methodology for building real software with Claude as the planning
-partner and Claude Code as the implementer, refined across a full
-project build (an iOS app, from blank repo to a working, tested,
-CloudKit-synced v1). Nothing here is specific to that app — it's the
-process, not the product.
+partner and Claude Code as the implementer. This file is the process;
+the reasoning behind its less obvious choices, and the history of how
+they were reached, is in `references/design-record.md`.
 
 ## The core idea
 
@@ -25,16 +24,13 @@ resume cold than one that doesn't.
 
 ## The three-tool division of labor
 
-- **Claude (chat)** is the planning partner at a project's start —
-  narrowing scope, resolving ambiguity, arguing about a design
-  decision, asking the question that saves a rewrite later. It hosts
-  the idea conversation, the constitution, and the first `spec.md`,
-  none of which has a codebase to look at yet, and early in a project
-  it also authors `plan.md` and `tasks.md`. Once the project has
-  shipped code, every later spec conversation moves into Claude Code
-  too (see "Spec conversations" under "Model tiering"), and plan and
-  task authorship moves to the `sdd-planner` (see "Who authors plan.md
-  and tasks.md" below).
+- **Claude (chat)** hosts a project's start — the idea conversation,
+  the constitution, the first `spec.md`, and the first `plan.md` and
+  `tasks.md` — none of which has a codebase to look at yet. Once the
+  first spec ships, chat's part is over: every later spec conversation
+  happens in Claude Code (see "Spec conversations" under "Model
+  tiering"), and plan and task drafting moves to the `sdd-planner`
+  subagent (see "Who authors plan.md and tasks.md").
 - **Claude Design** (if the project has a UI) produces visual references
   — screens, a token system, a written brief — not literal source code
   for a native app. Its output is HTML/CSS underneath. For a web app that
@@ -42,16 +38,14 @@ resume cold than one that doesn't.
   it as what a designer's mockups would be for a native team: the target
   to translate toward, not something to import.
 - **Claude Code** implements, tests, and verifies against the documents
-  as ground truth. It should be reading `CLAUDE.md` at the start of every
-  session and treating `spec.md`/`plan.md`/`tasks.md` as the actual
-  source of truth for what's being built — not the chat history. Once
-  shipped code exists, it also drafts `plan.md` and `tasks.md` — through
-  the `sdd-planner` subagent, one dispatch per spec — since at that
-  point the ground truth a plan extends lives where only it can see.
-  During implementation it orchestrates rather than
-  types: each routine task is dispatched to the `sdd-implementer`
-  subagent one tier down, and the main session triages, verifies, and
-  commits (see "Model tiering" below).
+  as ground truth — reading `CLAUDE.md` at the start of every session
+  and treating `spec.md`/`plan.md`/`tasks.md` as the source of truth for
+  what's being built, not the chat history. Once shipped code exists it
+  also drafts `plan.md` and `tasks.md`, through the `sdd-planner`, one
+  dispatch per spec. During implementation it orchestrates rather than
+  types: each routine task goes to the `sdd-implementer` subagent one
+  tier down, and the session triages, verifies, and commits (see
+  "Model tiering").
 
 ## Involvement level: decide it once, at the start
 
@@ -70,18 +64,14 @@ every pause. Two levels:
   review.
 - **Technical lead**. The person also reads and approves `plan.md` and
   `tasks.md`, and implementation pauses for their review after every
-  task the planner marked `review: per-task` — the original shape of
-  this skill, with the per-task gate now the exception rather than the
-  rule for foundational phases.
+  task the planner marked `review: per-task`.
 
 Everything below that mentions a review, an approval, or a pause is
 written for the product-owner level unless it says otherwise; the
 technical-lead variant is the same flow with the person added back at
-those gates. The default is product owner because, across the projects
-this skill has run on, a person who set out not to touch code turned
-out not to want to approve architecture either — the per-task pauses
-became a report glanced at and a button pressed, which is worse than no
-gate: it looks like review without being one.
+those gates. Product owner is the default because a per-task pause a
+non-technical person clicks through looks like review without being
+one — worse than no gate.
 
 ## The document set
 
@@ -127,8 +117,8 @@ design-brief-template.md` is the starting shape, deliberately empty of
 any specific project's actual answers (see the note at the top of that
 file for why copying a previous project's palette or signature element
 forward defeats the point). Four principles are worth stating here
-directly, since on the one project this has been tried on, they were the
-difference between a distinctive visual identity and a generic one:
+directly — they are the difference between a distinctive visual
+identity and a generic one:
 
 1. **Draw from the audience's own existing visual vocabulary, not a
    generic aesthetic.** Before reaching for a trendy look, ask whether
@@ -165,23 +155,22 @@ difference between a distinctive visual identity and a generic one:
 
 ## The first-spec exception
 
-A brand-new project's first spec is usually going to be bigger and more
-coupled than every spec after it — the data model, the core screens, and
-the core flows are all interdependent, so splitting them into separate
-specs before any of them work yet just adds coordination overhead with
-zero payoff. This is a deliberate, one-time exception, not a failure to
+A brand-new project's first spec is usually bigger and more coupled
+than every spec after it — the data model, the core screens, and the
+core flows are all interdependent, so splitting them into separate
+specs before any of them work yet adds coordination overhead with zero
+payoff. This is a deliberate, one-time exception, not a failure to
 scope well. The moment that first spec ships, the condition that
 justified it stops holding — there's now an established codebase, and
-every spec after it should return to the normal rule: one feature, one
-spec, sized to be reviewable on its own.
+every spec after it returns to the normal rule: one feature, one spec,
+sized to be reviewable on its own.
 
 ## Git conventions
 
 - One branch per **spec**, never per task or phase.
 - Open the PR as a **draft** immediately after pushing the branch — it
   gives a running diff to review commit-by-commit, separate from
-  whatever Claude Code's own summaries say. This is genuinely useful,
-  not just process for its own sake.
+  whatever Claude Code's own summaries say.
 - Only mark it ready and merge once *every* task in that spec's
   `tasks.md` is done and verified — not when it "looks done." Merging
   partway through, even with good intentions, defeats the point of
@@ -211,8 +200,7 @@ spec, sized to be reviewable on its own.
 Reviewing every single task at the same depth is both exhausting and
 miscalibrated — a wrong CRUD field is a five-minute fix; a wrong data
 model decision discovered three weeks later is not. Tier the review
-cadence by how expensive a mistake would be to unwind, not by a flat
-rule:
+cadence by how expensive a mistake would be to unwind:
 
 - **Review after every phase**, with a phase bundle — the default
   everywhere, foundational phases included. A foundational phase is
@@ -226,12 +214,7 @@ rule:
   call, even mid-phase, rather than treating the cadence as fixed once
   set.
 
-This is the *reviewer's* cadence, and it used to be heavier: per task
-throughout foundational phases, a rule from when the person's attention
-was the scarce resource and a per-task look at foundational work cost
-nothing else. With a token-priced reviewer it did — on the first specs
-measured, review cost about twice the implementation it reviewed. At
-the product-owner level every one of these reviews is a
+At the product-owner level every one of these reviews is a
 skeptical-reviewer pass, and none of them pauses for the person. The
 person's own pauses follow a different rule: after each phase (unless
 they've said to run further), and whenever something unexpected
@@ -248,34 +231,24 @@ The best available model does the things that are genuinely
 decisions — the spec conversation, plan and task drafting (the
 `sdd-planner`, one dispatch per spec), and the skeptical-reviewer on
 sign-off and on routine-but-real decision reviews — and nothing else.
-The orchestrating session itself runs one tier down, at medium effort:
-it takes thousands of bookkeeping turns and re-sends its whole context
-on each, and on the first measured specs that re-send volume was eight
-to nine times the implementers' and the dominant cost of the
-workflow. The top tier reaches it only through explicit per-call
-overrides on the planner and sign-off dispatches; the agent definitions
-carry `effort: high` so reasoning stays full-strength inside them. The
-reviewer's per-phase checks and marked per-task checks — a diff
-against the plan sections
-it implements — run one tier down, like the implementation they check.
-Implementation itself — the edit, build, test loop that accounts for
-most of a spec's tokens — runs one tier down, in the `sdd-implementer`
-subagent (`assets/sdd-implementer.md`), one task per dispatch. The
-split is by *role*, decided per task at execution time, not by a table
-written in advance.
+The orchestrating session runs one tier down, at medium effort: it
+takes many bookkeeping turns and re-sends its whole context on each,
+which makes it the dominant cost of the workflow. The top tier reaches
+it only through explicit per-call overrides on the planner and
+sign-off dispatches; the agent definitions carry `effort: high` so
+reasoning stays full-strength inside them. Implementation — the edit,
+build, test loop that accounts for most of a spec's tokens — runs one
+tier down in the `sdd-implementer` subagent
+(`assets/sdd-implementer.md`), one task per dispatch, and the
+reviewer's per-phase and marked per-task checks run one tier down like
+the work they check.
 
-That distinction is the whole reason this works where an earlier
-attempt didn't. The reference project tried tiering model and effort
-per task, predicted up front by the foundational-vs-mechanical split,
-and abandoned it: several tasks assumed safely mechanical benefited
-from the top tier in ways nobody saw coming. What's different now is
-that the strong model reads every task before dispatching it (Step 1
-triage), reads every report that comes back, re-runs verification
-itself, and has the reviewer on foundational tasks — and the
-implementer is under a standing rule to stop and return the moment it
-hits a judgment call rather than resolve it. The failure that sank the
-static table — a lighter model quietly doing a worse job on a task that
-looked mechanical — now has three independent catches instead of none.
+The split is by *role*, decided per task at execution time — not a
+per-task model table written in advance. Three things catch a lighter
+model quietly doing a worse job on a task that looked mechanical: the
+orchestrator reads every task before dispatch and every report after,
+the implementer is under a standing rule to stop and return the moment
+it hits a judgment call, and the reviewer sits at every phase boundary.
 
 How the loop runs, per task, in the orchestrating session:
 
@@ -297,13 +270,14 @@ How the loop runs, per task, in the orchestrating session:
    acceptance criteria) and invokes the reviewer on that alone; for
    every other task the implementer's output is the verification and
    the phase review is the check. Open the diff yourself only when
-   something failed. If the orchestrator reads every diff in
-   full, the work has been paid for twice.
-4. **One review, at most one re-review, per task.** The re-review sees
-   the findings and the fix diff, nothing more, and whatever is still
-   open after it goes to the tier log and the pre-merge sweep. Blocking
-   is defined narrowly — would fail an acceptance criterion or a test,
-   or contradicts the plan or constitution — and nothing else blocks.
+   something failed — an orchestrator that reads every diff in full
+   has paid for the work twice.
+4. **One review, at most one re-review, per invocation.** The
+   re-review sees the findings and the fix diff, nothing more, and
+   whatever is still open after it goes to the tier log and the
+   pre-merge sweep. Blocking is defined narrowly — would fail an
+   acceptance criterion or a test, or contradicts the plan or
+   constitution — and nothing else blocks.
 5. **Commit, check the box, record findings — and nothing else by
    hand.** The orchestrator is the only writer of `tasks.md` and the
    only one who commits; a commit means orchestrator-verified. Findings
@@ -313,24 +287,21 @@ How the loop runs, per task, in the orchestrating session:
    itself, and does not do device, browser, or visual verification by
    hand: second-look items go to the log or the next task's bundle, and
    visual checks are the implementer's Verify criterion or the person's
-   attestation at the phase pause. On the first measured specs, "folded
-   in by the orchestrator" and "seen by the orchestrator" were
-   recurring log entries — each one the orchestrating session doing
-   work the tiering exists to move off it.
+   attestation at the phase pause. Every piece of work the
+   orchestrator "folds in" itself is work the tiering exists to move
+   off it.
 6. **Sequential, one task at a time, and drop the carried context at
    each phase boundary.** Commit-per-task and shared files make
    parallel implementers messy; parallel dispatch is a deliberate
    opt-in for a later day, not the default. At a phase pause, `/clear`
    and resume from the first unchecked task; compact only mid-phase if
-   the context grows large. The orchestrator's context is re-sent on
-   every turn, and it must not carry the whole spec.
+   the context grows large (see "Session and context hygiene").
 
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
 the orchestrator considers well-specified, the orchestrator does that
-task itself and notes the miss in `tasks.md`. That's
-the surviving form of the reference project's lesson: a tier assignment
-is a guess to verify, and the misses are the data.
+task itself and notes the miss in `tasks.md`. A tier assignment is a
+guess to verify, and the misses are the data.
 
 **A third tier is available but off by default.** The dispatch can
 override the implementer's model per call — Sonnet for a task that
@@ -341,26 +312,15 @@ copies, and a small footprint. Leave it off until a project's first
 spec under this policy shows Opus dispatch working, then turn it on in
 that project's `CLAUDE.md` if the numbers justify it.
 
-**Measure it — the first measurement went the wrong way.** The
-subagent's return reports its token usage; log it per invocation in
-`tasks.md`'s tier log, alongside any escape-hatch misses, and compare
-the spec's total (from `ccusage session` afterward — the orchestrator
-can't see its own usage) against a previous spec of similar size. The
-first specs measured under this policy cost *more* than the
-single-session regime, not less, for reasons that are now rules above:
-an unbounded fix-and-re-review loop in which a cold reviewer found a
-new objection every round (over half of one spec's subagent tokens sat
-in four tasks' loops); implementers and the orchestrator ingesting raw
-build logs; the orchestrator re-running every verification at the top
-tier; a whole-codebase sweep at the top tier; and one orchestrator
-session accumulating the entire spec. The loop cap, the bundles, the
-verification command, the sweep bound, and the per-phase session are
-the response. If a spec measured under those still loses to the
+**Measure it.** The subagent's return reports its token usage; log it
+per invocation in `tasks.md`'s tier log with the resolved model name,
+alongside any escape-hatch misses, and compare the spec's total (from
+`ccusage session --breakdown` afterward — the orchestrator can't see
+its own usage) against a previous spec of similar size. The policy
+earns its keep only while the coordination overhead stays smaller than
+what it replaces; if a spec measured under it still loses to the
 single-session regime on the top tier's budget, roll the implementer
-layer back and keep only the reviewer changes: the structural argument
-for dispatch — cheaper rates on the bulk of the work, small fresh
-contexts — holds only while the coordination overhead stays smaller
-than what it replaces.
+layer back and keep the reviewer changes.
 
 **Two names, one place.** The constitution's model policy names the
 top tier and the step-down tier once; everything else refers to the
@@ -376,57 +336,37 @@ sign-off dispatches for the rest of the window, and log what ran.
 after.** The idea conversation, the constitution, and the first spec
 happen in chat — there is no codebase yet, and chat is the top tier at
 the person's own setting. Every later spec conversation happens in
-Claude Code, in a session of its own that ends — with a new session,
-not `/clear`, since a clear keeps the model — when the spec is
-approved; never inside an orchestrating session, whose context is the
-cost the tiering exists to contain. One constraint the skill can't
-design around: a session has one model, set at start, and this
-project's default is the step-down tier. So a spec session opens by
-stating which model it's running, and if that's the step-down tier, it
-asks the person to pick the top tier for this session only before the
-conversation continues. That is the single picker choice in the whole
-workflow — and it's a choice about where the person's own thinking
-runs, not bookkeeping, which is why it's the one left to them.
+Claude Code, in a session of its own — never inside an orchestrating
+session, whose context is the cost the tiering exists to contain. A
+session has one model, set at start, and the project default is the
+step-down tier, so a spec session opens by stating which model it's
+running and, if that's the step-down tier, asks the person to pick the
+top tier for this session only. That is the single picker choice in
+the whole workflow; it's a choice about where the person's own
+thinking runs, which is why it's the one left to them.
 
-**Cache re-sends are the cost, so context size and turn count are the
-levers.** On the measured sessions, cache reads were 97% of all
-tokens. Clear at every phase boundary and at spec end — the skill
-resumes cold from `tasks.md` for free; compact mid-phase only if the
-context grows large; never clear mid-task. Keep spec conversations in
-their own session, cleared afterward. Batch bookkeeping into single
-shell commands. Each turn saved is a re-send of the whole context
-saved.
-
-**Why the orchestrator isn't the top tier, and isn't at high
-effort.** "A stronger orchestrator makes fewer mistakes, so it's
-cheaper in the long run" is true wherever the orchestrator makes
-judgment calls — and the policy routes every judgment call elsewhere:
-design to the planner and sign-off, correctness to the verification
-command and the reviewer, product questions to the person. What's left
-is procedure, whose errors are cheap and self-revealing (a bad bundle
-fails verification; the cost is one re-dispatch) and don't compound.
-That bounded cost is traded against a tier premium on every turn of
-every task, in the longest-lived context of the workflow. Medium
-effort is the same reasoning applied to behavior: high effort makes a
-session investigate before acting, and everything a hands-off
-orchestrator reads inflates every later re-send. The cost side is
-measured; the quality side is design intent, untested until a tier log
-shows procedural misses. If one does, the order of experiments is
-step-down at high effort first, top tier second — the full record and
-the reasons for that order are in
-`references/model-tiering-rationale.md`.
+**Why the orchestrator isn't the top tier, and isn't at high effort.**
+"A stronger orchestrator makes fewer mistakes" is true wherever the
+orchestrator makes judgment calls, and the policy routes every judgment
+call elsewhere: design to the planner and sign-off, correctness to the
+verification command and the reviewer, product questions to the
+person. What's left is procedure, whose errors are cheap and
+self-revealing and don't compound — traded against a tier premium on
+every turn of the longest-lived context in the workflow. Medium effort
+is the same reasoning applied to behavior: high effort makes a session
+investigate before acting, and everything a hands-off orchestrator
+reads inflates every later re-send. If a tier log shows procedural
+misses, the order of experiments is step-down at high effort first,
+top tier second; `references/design-record.md` has the full case.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
-involvement level. The two are orthogonal — a product owner never sees
-any of this — but both are decide-once-at-the-start settings, and they
-belong together. The skeptical-reviewer's definition defaults to one
-tier down (`model: opus`), the right tier for its frequent per-task and
-per-phase checks and for the pre-merge sweep; the orchestrator
-overrides it up for sign-off and decision reviews only. See "Keeping
-reviews cheap" in the collaboration workflow for the reasoning, and for
-the bundles that keep every review — and every implementer dispatch —
-from reading the codebase at all.
+involvement level — orthogonal settings, both decided once at the
+start. The skeptical-reviewer's definition defaults to one tier down
+(`model: opus`); the orchestrator overrides it up for sign-off and
+decision reviews only. See "Keeping reviews cheap" in the
+collaboration workflow for the bundles that keep every review — and
+every implementer dispatch — from reading the codebase at all.
 
 ## The flow at a glance: where each step runs, and on what
 
@@ -483,18 +423,15 @@ decision reviews. Everything that has a turn count runs on Opus.
 ## Principles worth generalizing
 
 These aren't language-specific or platform-specific — they're patterns
-that showed up repeatedly enough across one real build to be worth
-carrying into the next one from day one, instead of rediscovering each
-time.
+worth carrying into every project from day one instead of rediscovering
+each time.
 
 1. **Test the architectural claim, don't just assert it in a document.**
    If a plan document says "this schema is compatible with X" or "these
    colors are distinguishable," that's a testable claim — write the test
    that would catch it being false, don't just write the sentence and
-   trust it. This generalizes further than it sounds: the same instinct
-   caught a database-compatibility bug, a color-contrast bug, and an
-   asset-loading bug in one project, because it's really "any claim
-   about how the system behaves is a test, not a comment."
+   trust it. This generalizes further than it sounds: "any claim about
+   how the system behaves is a test, not a comment."
 
 2. **A passing test is not evidence it can fail.** Mutation-test
    anything that matters: deliberately break the rule the test claims to
@@ -533,10 +470,10 @@ time.
    not just the places it matched.
 
 6. **Reserve real "use it yourself" time — don't review only diffs and
-   summaries.** Some of the most important catches in a build like this
-   come from someone actually using the running thing, not from reading
-   what changed. A summary can describe a feature working correctly
-   while the actual feel of it is off in a way no diff would show.
+   summaries.** Some of the most important catches come from someone
+   actually using the running thing, not from reading what changed. A
+   summary can describe a feature working correctly while the actual
+   feel of it is off in a way no diff would show.
 
 7. **Own mistakes plainly, in both directions.** This applies to the AI
    and the human equally. When a wrong technical conclusion gets
@@ -550,8 +487,8 @@ time.
 
 The moment implementation starts, `tasks.md` gets written by more than
 one party — the planning conversation adds scope and reshuffles tasks,
-and the implementer checks boxes and adds findings as it works. This is
-different in kind from every other document, which has exactly one
+and the orchestrator checks boxes and adds findings as it works. This
+is different in kind from every other document, which has exactly one
 writer, and it needs different handling:
 
 - **Never edit from memory or an old copy.** Before making any change,
@@ -569,23 +506,29 @@ writer, and it needs different handling:
 
 ## Session and context hygiene
 
+Cache re-sends of carried context are the cost — on measured sessions,
+97% of all tokens — so context size and turn count are the levers.
+
 - In Claude Code, `/clear` at every phase boundary and at spec end —
   not `/compact` — because a project with real documentation
   discipline loses almost nothing when the conversation resets:
   `CLAUDE.md` re-reads automatically, and `tasks.md` is exactly the
-  file designed to answer "where was I" cold. Measured across real
-  sessions, cache re-sends of carried context were 97% of all tokens,
-  so the carried context *is* the cost. `/compact` is for staying
+  file designed to answer "where was I" cold. `/compact` is for staying
   mid-phase when the context has grown large; never clear mid-task.
-- In a chat interface without that command, the equivalent move is
+- A spec conversation gets a session of its own and ends with a new
+  session (not `/clear`, which keeps the model — see "The flow at a
+  glance").
+- Batch bookkeeping into single shell commands. Each turn saved is a
+  re-send of the whole context saved.
+- In a chat interface without a clear command, the equivalent move is
   starting a fresh conversation with the project's key documents
   uploaded to its knowledge base — same principle, same payoff, since
   the real state was never only in the chat to begin with.
 - If a long planning conversation accumulates genuinely valuable
   reasoning that isn't fully captured in the terse final form of the
-  docs — the *why* behind a decision, not just the decision — consider
-  writing a short session summary before moving to a fresh conversation,
-  so that reasoning isn't lost even though it's not literally in the repo.
+  docs — the *why* behind a decision, not just the decision — write a
+  short session summary before moving to a fresh conversation, so that
+  reasoning isn't lost even though it's not literally in the repo.
 
 ## The collaboration workflow
 
@@ -594,14 +537,15 @@ version of this. In short: **the default is to stay inside Claude Code**,
 using Plan Mode (research and propose before touching any files) for
 real decisions, and a custom reviewer subagent (see
 `assets/skeptical-reviewer.md`) for a genuinely independent second look
-without leaving the tool. A separate chat conversation is reserved for
-two specific triggers, not general "foundational" judgment: something in
-the design turning out infeasible or needing substantial rework, or a
-previously-unknown consideration surfacing that would materially change
-the project's direction. Everything else — including plenty of things
-that feel weighty in the moment — resolves inside Claude Code. This
-tiering follows the same risk-based logic as review cadence above,
-applied to *which surface a decision happens on*.
+without leaving the tool. A separate conversation with the person is
+reserved for two specific triggers, not general "foundational"
+judgment: something in the design turning out infeasible or needing
+substantial rework, or a previously-unknown consideration surfacing
+that would materially change the project's direction. Everything else
+— including plenty of things that feel weighty in the moment —
+resolves inside Claude Code. This tiering follows the same risk-based
+logic as review cadence above, applied to *which surface a decision
+happens on*.
 
 ## A realistic first sequence for a new project
 
@@ -610,11 +554,10 @@ project specifically, the natural weighting is uneven: the idea itself,
 the spec's user flows, and the design direction are where iteration
 genuinely pays off. The constitution's technical choices — framework,
 hosting, package manager, and similar — are comparatively fungible;
-"good enough, quickly" costs little there, and treating them as an
-extended negotiation is a mismatch of effort to what's actually at
-stake. This is a preference, not a universal rule — say so explicitly
-if a given project actually wants more rigor upfront on the technical
-side (real infra stakes, a team involved), and follow that instead.
+"good enough, quickly" costs little there. This is a preference, not a
+universal rule — say so explicitly if a given project actually wants
+more rigor upfront on the technical side (real infra stakes, a team
+involved), and follow that instead.
 
 0. **Idea conversation, before any technical decision.** Audience,
    purpose, what makes this distinctive, the core loop or the point of
@@ -623,23 +566,21 @@ side (real infra stakes, a team involved), and follow that instead.
    naturally once the idea is clear, not the other way around.
 1. **Constitution conversation.** Platform/language/architecture choices,
    testing philosophy, dependency policy, and the person's involvement
-   level (see "Involvement level" above — ask once, directly, and
-   default to product owner) — write `CLAUDE.md` before any code
-   exists, so the first thing Claude Code reads when it scaffolds the
-   project is the constitution, not its own defaults. The same step
-   writes `.claude/settings.json` from `assets/settings-template.json`
-   — the session model and effort the model policy relies on — and
-   commits it with the constitution. The person never creates this by
-   hand; it's part of scaffolding, and the orchestrator recreates it
-   if it's ever missing. Move through
-   this efficiently once the idea is settled: when someone doesn't have
-   a strong preference on a technical choice, recommend a sensible
-   default and explain briefly why, rather than opening it up as an
-   extended exploration. "No preference" is a signal to move quickly,
-   not an invitation to generate a longer list of options. If asked to
-   help explore an option (hosting, for instance), give a genuine,
-   opinionated recommendation grounded in what's already been decided
-   — not a neutral menu that hands the decision back.
+   level (ask once, directly, and default to product owner) — write
+   `CLAUDE.md` before any code exists, so the first thing Claude Code
+   reads when it scaffolds the project is the constitution, not its own
+   defaults. The same step writes `.claude/settings.json` from
+   `assets/settings-template.json` — the session model and effort the
+   model policy relies on — and commits it with the constitution. The
+   person never creates this by hand; it's part of scaffolding, and the
+   orchestrator recreates it if it's ever missing. Move through this
+   efficiently once the idea is settled: when someone doesn't have a
+   strong preference on a technical choice, recommend a sensible
+   default and explain briefly why. "No preference" is a signal to move
+   quickly, not an invitation to generate a longer list of options. If
+   asked to help explore an option (hosting, for instance), give a
+   genuine, opinionated recommendation grounded in what's already been
+   decided — not a neutral menu that hands the decision back.
 2. **First spec.** Accept that it'll be larger than specs after it (see
    "The first-spec exception"). Push on ambiguity now — it's nearly free
    to resolve in conversation and expensive to resolve after code exists.
@@ -664,86 +605,66 @@ side (real infra stakes, a team involved), and follow that instead.
 1** — the constitution already exists and stays in force unless this
 particular feature genuinely requires amending it, per `CLAUDE.md`'s own
 rule (amend explicitly, in its own commit, before the spec proceeds).
-Steps 0 and 2 still happen the same way, as a conversation with the
-person — in Claude Code now, in a spec session of its own at the top
-tier (see "Spec conversations" under "Model tiering") — a second or
-tenth spec doesn't skip the idea-and-design phase just because the
-project already has a working codebase. Steps 3 and 5, though, change
-hands once the project has shipped code — see the next section.
+Steps 0 and 2 still happen as a conversation with the person — in
+Claude Code now, in a spec session of its own at the top tier — a
+second or tenth spec doesn't skip the idea-and-design phase just
+because the project already has a working codebase. Steps 3 and 5
+change hands once the project has shipped code — see the next section.
 
 ## Who authors plan.md and tasks.md: a phase transition
 
 Authorship of `plan.md` and `tasks.md` splits along the what/how
-boundary, not the chat/Claude-Code boundary — and which tool holds the
-pen for the *how* depends on whether there's a codebase yet.
+boundary, and which tool holds the pen for the *how* depends on whether
+there's a codebase yet.
 
 **Until the project has shipped code, plan in chat.** A first spec's
 plan *invents* the architecture rather than extending one — there is
 nothing to inspect, and the design conversation holds all the relevant
-context. This is the original shape the skill grew from, and it remains
-right for that phase.
+context.
 
 **Once shipped code is what plans extend, plan in Claude Code.** A plan
 against a real codebase needs the actual model definitions, the actual
 view structure, the actual dependency-injection shape — ground truth
-that chat can only see through a manually-uploaded snapshot that starts
-subtly stale and drifts from there. The workaround is a relay: Claude
-Code prints state into chat, chat authors the plan against the paste, a
-transcription layer whose only function is preserving a rule written
-for a condition that no longer holds. Instead, once `spec.md` is
-approved: the orchestrating session assembles a planning bundle with
-shell — the spec, the previous spec's `plan.md` and `tasks.md` as the
-pattern, a file listing — and dispatches the `sdd-planner` subagent
-(`assets/sdd-planner.md`) on it, once, at the top tier. The planner
-reads the code the spec touches, writes both files marked Draft, and
-returns a summary with its token usage for the tier log. The
-orchestrator commits the drafts to the spec branch with the PR still in
-draft, and the skeptical-reviewer signs off. The exploration a plan
-needs is the expensive part of planning, and this puts it in a
-discardable context, bounded by the bundle, instead of in the session
-that then carries it through every sign-off round and into
-implementation.
+chat can't see. Once `spec.md` is approved, the orchestrating session
+assembles a planning bundle with shell — the spec, the previous spec's
+`plan.md` and `tasks.md` as the pattern, a file listing — and
+dispatches the `sdd-planner` subagent (`assets/sdd-planner.md`) on it,
+once, at the top tier. The planner reads the code the spec touches,
+writes both files marked Draft, and returns a summary with its token
+usage for the tier log. The orchestrator commits the drafts to the spec
+branch with the PR still in draft, and the skeptical-reviewer signs
+off. The exploration a plan needs is the expensive part of planning,
+and this puts it in a discardable context, bounded by the bundle,
+instead of in the session that then carries it into implementation.
 
 **`spec.md` stays a conversation with the person in both phases** —
 in chat for the first spec, in a dedicated Claude Code spec session
-after. It captures product intent, user-facing behavior, and decisions
-— the design conversation's actual job — and the model writing it
-should be reasoning about the product, not reading the code.
+after. It captures product intent, user-facing behavior, and decisions,
+and the model writing it should be reasoning about the product, not
+reading the code.
 
 **Who signs off depends on involvement level, and this is the one place
 the levels differ materially.** At the technical-lead level, the person
 reads and approves `plan.md` and `tasks.md` before any implementation
-task starts, in either authorship phase — drafting relocated; approval
-didn't. At the product-owner level, the planner's draft plus the
-skeptical-reviewer's sign-off is the gate: the reviewer checks the
-draft against `spec.md` and `CLAUDE.md`, blocking findings go back to
-the orchestrator to be fixed and re-reviewed once, and the person
-receives a
-**spec-conformance summary** rather than the plan itself — which
-acceptance criteria the plan serves and how, where it deviates from the
-spec and why, and any product question it surfaced that needs their
-call. They approve the *what* that summary describes; the *how* is
-already signed. Supervision hasn't been removed, it's been relocated:
-to the spec (the contract), the reviewer (the check), and the
-escalation triggers (the exit). That's what keeps this from reading as
-"Claude Code plans and builds unsupervised."
-
-Two risks worth naming, both covered by machinery the workflow already
-has. A planner with the code open may anchor on what's easy to build
-over what's right — but Plan Mode separates thinking from doing, the
-skeptical-reviewer exists precisely to challenge convenient answers,
-and the spec, authored in conversation without implementation
-anchoring, remains the contract the plan is reviewed against. And a product
-decision surfacing mid-plan could get settled silently in `plan.md` —
-but the escalation rule already covers this: anything that turns out to
-be a product decision goes back to the person (in practice, back to
-the spec chat) rather than being resolved by the planner.
+task starts, in either authorship phase. At the product-owner level,
+the planner's draft plus the skeptical-reviewer's sign-off is the gate:
+the reviewer checks the draft against `spec.md` and `CLAUDE.md`,
+blocking findings go back to the orchestrator to be fixed and
+re-reviewed once, and the person receives a **spec-conformance
+summary** rather than the plan itself — which acceptance criteria the
+plan serves and how, where it deviates from the spec and why, and any
+product question it surfaced that needs their call. They approve the
+*what* that summary describes; the *how* is already signed.
+Supervision hasn't been removed, it's been relocated: to the spec (the
+contract), the reviewer (the check), and the escalation triggers (the
+exit). One standing rule for the planner: anything that turns out to
+be a product decision goes back to the person, never settled silently
+in `plan.md`.
 
 ## Building tasks.md: from plan to an ordered task list
 
 Turning an approved `spec.md`/`plan.md` into `tasks.md` is a skill worth
-being deliberate about, not just "break it into steps." A few concrete
-things made this work well on the reference project:
+being deliberate about, not just "break it into steps":
 
 1. **Every task has a checkable "Verify:" criterion**, not just a
    description of what to build. "Implement the item list" isn't a
@@ -795,26 +716,21 @@ ended at merge. Handle it on a spectrum, matching its actual size:
   works, even if the code change itself is small) — same small
   branch/PR shape, but also update the original spec's `plan.md` in
   place to reflect the corrected understanding. `plan.md` is a living
-  document, not a frozen snapshot (see "The document set" above) — a
-  fix that changes what's actually true about the system belongs there,
-  even months after that spec shipped.
+  document, not a frozen snapshot — a fix that changes what's actually
+  true about the system belongs there, even months after that spec
+  shipped.
 - **Bigger than a fix** (the correction needs substantial rework, or
   reveals a genuinely new design question) — this has become a new spec
-  in its own right, not a patch. The same two triggers that already
-  govern escalation during implementation apply here too: infeasibility/
-  rework and a direction-changing unknown are exactly the signal that a
-  "bug fix" has actually turned into something needing the real
-  spec → plan → tasks treatment before more code gets written — the
-  spec in its own session with the person, the plan and tasks per the
-  authorship phase transition above (which, for a project with shipped
-  code, means the `sdd-planner`).
+  in its own right, not a patch. The same two escalation triggers
+  apply: infeasibility/rework and a direction-changing unknown are
+  exactly the signal that a "bug fix" needs the real spec → plan →
+  tasks treatment before more code gets written — the spec in its own
+  session with the person, the plan and tasks via the `sdd-planner`.
 
-The existing per-task triage (see "The collaboration workflow" and
-`references/collaboration-workflow.md`) already governs how much
-scrutiny any given fix needs — routine ones proceed normally, real ones
-get Plan Mode and the subagent, foundational ones escalate. Nothing new
-there; what's actually missing is the git shape, since "one branch per
-spec" was never written with work-that-isn't-a-spec in mind.
+The per-task triage in `references/collaboration-workflow.md` already
+governs how much scrutiny any given fix needs; what this section adds
+is the git shape, since "one branch per spec" was never written with
+work-that-isn't-a-spec in mind.
 
 ## Using the templates
 
@@ -824,9 +740,7 @@ spec" was never written with work-that-isn't-a-spec in mind.
 a UI, `settings-template.json` (the project's `.claude/settings.json`,
 written at setup), and three ready-to-use Claude Code subagent
 definitions: `skeptical-reviewer.md`, `sdd-implementer.md`, and
-`sdd-planner.md`.
-The document
-templates are skeletons with placeholders and inline guidance
-comments, not fill-in-the-blank forms — expect to restructure sections
-as the actual project's needs diverge from the template, the same way
-real projects always do.
+`sdd-planner.md`. The document templates are skeletons with
+placeholders and inline guidance comments, not fill-in-the-blank forms
+— expect to restructure sections as the actual project's needs diverge
+from the template, the same way real projects always do.
