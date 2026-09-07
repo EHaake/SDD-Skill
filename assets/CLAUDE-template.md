@@ -79,8 +79,12 @@ names as models change; the roles don't. -->
   names are the only place a model is spelled out; everything below
   refers to them.
 - **The session runs at the step-down tier, at medium effort**, set in
-  this repo's `.claude/settings.json` (`"model": "opus"`,
-  `"effortLevel": "medium"`) so no one has to remember it. The
+  this repo's `.claude/settings.json` so no one has to remember it:
+  `"model": "opus"`, `"effortLevel": "medium"`, and the same level
+  under `"modelSettings"` for the step-down model's full ID. Project
+  settings outrank user settings, so a model picked in the app's
+  picker only affects the session it was picked in — new sessions in
+  this repo start here regardless. The
   orchestrating session takes thousands of bookkeeping turns and
   re-sends its whole context on each one; measured across the first
   specs, that re-send volume was eight to nine times the implementers'
