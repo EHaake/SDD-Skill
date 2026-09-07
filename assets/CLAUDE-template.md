@@ -103,9 +103,12 @@ names as models change; the roles don't. -->
   at the top tier, and end when the spec is approved — never inside an
   orchestrating session. A session in this repo opens at the step-down
   tier, so a spec session states its model first and, if it's the
-  step-down tier, asks the person to pick the top tier for this
-  session only before continuing. (The project's very first spec, with
-  no codebase yet, happened in chat.)
+  step-down tier, asks the person to switch to the top tier for this
+  session — the model selector in the app, or `/model fable` — before
+  continuing. `.claude/settings.json` pins effort per model, so
+  picking the top tier brings high effort with it and the next session
+  still opens at the step-down tier. (The project's very first spec,
+  with no codebase yet, happened in chat.)
 - **The `skeptical-reviewer` runs one tier down by default** (its
   definition says `opus`) for per-phase reviews, the per-task reviews
   the planner marks, and the pre-merge sweep. Each
