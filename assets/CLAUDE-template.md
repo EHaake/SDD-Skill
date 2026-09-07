@@ -75,12 +75,25 @@ after every task the planner marked `review: per-task`.
 <!-- Decided once, alongside the involvement level. Adjust the tier
 names as models change; the roles don't. -->
 
-- **Decisions run at the best available tier**: the spec conversation,
-  plan and task drafting (the `sdd-planner` subagent, one dispatch per
-  spec on a planning bundle), Step 1 triage, orchestration of
-  implementation, and the `skeptical-reviewer` when it's judging a
-  decision — plan/tasks sign-off and reviews of routine-but-real
-  decisions — via a per-call model override up from its default.
+- **Tiers by name**: top tier `fable`; step-down `opus`. These two
+  names are the only place a model is spelled out; everything below
+  refers to them.
+- **The session runs at the step-down tier, at medium effort**, set in
+  this repo's `.claude/settings.json` (`"model": "opus"`,
+  `"effortLevel": "medium"`) so no one has to remember it. The
+  orchestrating session takes thousands of bookkeeping turns and
+  re-sends its whole context on each one; measured across the first
+  specs, that re-send volume was eight to nine times the implementers'
+  and was the dominant cost of the entire workflow. It doesn't need
+  the top tier or deep reasoning to assemble a bundle and tick a box.
+- **The top tier runs only inside the decisions**: the `sdd-planner`
+  (one dispatch per spec) and the `skeptical-reviewer` on plan/tasks
+  sign-off and on routine-but-real decision reviews — each dispatched
+  with an explicit per-call override to the top tier's name. The three
+  agent definitions carry `effort: high`, which overrides the session's
+  medium, so reasoning stays at full strength where it matters.
+- **Spec conversations happen in their own session**, cleared
+  afterward (or in chat, which has no codebase to carry at all).
 - **The `skeptical-reviewer` runs one tier down by default** (its
   definition says `opus`) for per-phase reviews, the per-task reviews
   the planner marks, and the pre-merge sweep. Each
@@ -104,16 +117,21 @@ names as models change; the roles don't. -->
   orchestrator edits `tasks.md` or commits, and the orchestrator never
   implements second-look notes or does device or browser checks by
   hand.
-- **Drop the carried context at each phase pause** — compact or start
-  fresh, resuming from the first unchecked task — so the top-tier
-  context doesn't accumulate the whole spec.
-- **Fallback**: the top tier is the session's model. If its usage
-  budget runs out, switch the session to the step-down model for the
-  rest of the window; planner and sign-off follow it, nothing else
-  changes, and the tier log records what ran.
+- **Clear at every phase boundary and at spec end** (`/clear`, resuming
+  from the first unchecked task). Cache re-sends are context size times
+  turn count; a phase boundary is where the carried context has the
+  least remaining value. Compact mid-phase only if the context grows
+  large; never clear mid-task.
+- **Batch the bookkeeping**: commit, checkbox, and tier-log row in one
+  shell command; bundle assembly and dispatch back to back. Every turn
+  saved is one fewer re-send of the whole context.
+- **Fallback**: if the top tier's usage budget runs out, dispatch the
+  planner and sign-off at the step-down tier for the rest of the
+  window (drop the override). Nothing else changes; the tier log
+  records what ran.
 - **Escape hatch**: two failed verifications on one task, or a "stopped
   on a judgment call" the orchestrator considers well-specified, and
-  the orchestrator does that task itself at the top tier, noting the
+  the orchestrator does that task itself, noting the
   miss in `tasks.md`.
 - **Third tier**: off. <!-- Turn on per project once the first spec's
   tier log justifies it: "Sonnet for tasks with an automated Verify

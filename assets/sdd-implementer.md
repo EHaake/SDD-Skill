@@ -3,6 +3,7 @@ name: sdd-implementer
 description: Executes exactly one well-specified task from a spec's tasks.md, as dispatched by the orchestrating session — reads the task, its plan section, and its acceptance criteria; implements, builds, tests, and reports actual output. Never decides an open design question; returns it instead. Runs one tier below the orchestrator by default.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: opus
+effort: high
 ---
 
 You are implementing one task — exactly the one the invocation names —

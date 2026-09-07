@@ -143,8 +143,10 @@ conservatively.
 
 Once shipped code is what plans extend (see the skill's authorship
 section), the orchestrating session doesn't draft `plan.md` and
-`tasks.md` itself — it dispatches `sdd-planner`, once per spec, at its
-own tier. The exploration a plan needs is the expensive part of
+`tasks.md` itself — it dispatches `sdd-planner`, once per spec, with a
+per-call override to the top tier named in `CLAUDE.md` (the session
+itself runs a tier down). The exploration a plan needs is the
+expensive part of
 planning; it belongs in a discardable context bounded by a planning
 bundle, not in the session that then carries it through every
 sign-off round and into implementation:
@@ -183,7 +185,7 @@ tiering" section), the main session doesn't implement tasks itself; it
 orchestrates. Per task:
 
 1. Step 1 triage, as above. Routine → dispatch. Not routine → Plan Mode
-   and the subagent at the top tier until what remains is
+   and the reviewer until what remains is
    transcription; then dispatch that.
 2. Assemble a task bundle with shell — the same move as the review
    bundle, so the content never enters the orchestrator's context —
@@ -229,20 +231,26 @@ orchestrates. Per task:
    `tasks.md` now. You are the only writer of `tasks.md` and the only
    one who commits.
 6. Escape hatch: two failed verifications, or a "stopped" report on
-   something you consider well-specified → do the task yourself at the
-   top tier and log the miss in the tier log.
+   something you consider well-specified → do the task yourself and
+   log the miss in the tier log.
 
 One task at a time. The implementer's "stopped on a judgment call"
 report is the cheapest escalation in the whole workflow — it costs one
 subagent run — so treat it as the system working, not as a failure to
 route around.
 
-**Drop the carried context at each phase pause** — compact, or start
-a fresh session; either is fine. Otherwise the orchestrator's context
-accumulates every report, every verification output, and every bundle
-of the whole spec, all at the top tier. The skill already resumes cold
-from the first unchecked task in `tasks.md`, so neither costs anything
-real, and the phase pause is the natural moment.
+**Clear at every phase boundary and at spec end.** Cache re-sends —
+context size times turn count — were 97% of all tokens on the measured
+sessions, so the carried context is the cost, and a phase boundary is
+where it has the least remaining value. `/clear` and resume from the
+first unchecked task in `tasks.md`; compact mid-phase only if the
+context grows large; never clear mid-task, which just buys a re-read.
+
+**Batch the bookkeeping.** After a task, the commit, the checkbox, and
+the tier-log row are one shell command, not three tool calls; bundle
+assembly and dispatch run back to back. The orchestrator re-sends its
+whole context on every turn, so every turn removed is that re-send
+removed.
 
 ## After implementation, not just before
 
@@ -338,12 +346,13 @@ Scope by invocation type:
 tier below the orchestrator (`model: opus`), which is right for
 per-phase and per-task reviews — checks of a diff against the plan
 sections it implements, and the frequent case. Override up to the
-orchestrator's own tier only where the reviewer is exercising judgment
-rather than checking transcription: plan/tasks sign-off and reviews of
+top tier named in `CLAUDE.md` only where the reviewer is exercising
+judgment rather than checking transcription: plan/tasks sign-off and
+reviews of
 routine-but-real decisions from Step 3. The pre-merge sweep stays at
 the default tier — it's broad by design, which makes it the most
 expensive single invocation, and the orchestrator adjudicates its
-findings at the top tier anyway. The default should be the frequent
+findings anyway. The default should be the frequent
 case, because forgetting to override up costs a lesser review while
 forgetting to override down costs the budget.
 

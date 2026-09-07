@@ -242,13 +242,19 @@ whole-codebase read; see "Keeping reviews cheap" in
 
 ## Model tiering: decisions at the top tier, execution one tier down
 
-The best available model does everything that involves a real
-decision: the spec conversation, plan and task drafting (the
-`sdd-planner`, one dispatch per spec), Step 1 triage, orchestration of
-implementation, and the skeptical-reviewer when it's
-judging a decision (sign-off, the pre-merge sweep, routine-but-real
-reviews). The reviewer's per-task checks in foundational phases and
-per-phase checks in mechanical ones — a diff against the plan sections
+The best available model does the things that are genuinely
+decisions — the spec conversation, plan and task drafting (the
+`sdd-planner`, one dispatch per spec), and the skeptical-reviewer on
+sign-off and on routine-but-real decision reviews — and nothing else.
+The orchestrating session itself runs one tier down, at medium effort:
+it takes thousands of bookkeeping turns and re-sends its whole context
+on each, and on the first measured specs that re-send volume was eight
+to nine times the implementers' and the dominant cost of the
+workflow. The top tier reaches it only through explicit per-call
+overrides on the planner and sign-off dispatches; the agent definitions
+carry `effort: high` so reasoning stays full-strength inside them. The
+reviewer's per-phase checks and marked per-task checks — a diff
+against the plan sections
 it implements — run one tier down, like the implementation they check.
 Implementation itself — the edit, build, test loop that accounts for
 most of a spec's tokens — runs one tier down, in the `sdd-implementer`
@@ -289,8 +295,8 @@ How the loop runs, per task, in the orchestrating session:
    acceptance criteria) and invokes the reviewer on that alone; for
    every other task the implementer's output is the verification and
    the phase review is the check. Open the diff yourself only when
-   something failed. If the orchestrator reads every diff in full at
-   the top tier, the work has been paid for twice.
+   something failed. If the orchestrator reads every diff in
+   full, the work has been paid for twice.
 4. **One review, at most one re-review, per task.** The re-review sees
    the findings and the fix diff, nothing more, and whatever is still
    open after it goes to the tier log and the pre-merge sweep. Blocking
@@ -319,7 +325,7 @@ How the loop runs, per task, in the orchestrating session:
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
 the orchestrator considers well-specified, the orchestrator does that
-task itself at the top tier and notes the miss in `tasks.md`. That's
+task itself and notes the miss in `tasks.md`. That's
 the surviving form of the reference project's lesson: a tier assignment
 is a guess to verify, and the misses are the data.
 
@@ -353,15 +359,22 @@ for dispatch — cheaper rates on the bulk of the work, small fresh
 contexts — holds only while the coordination overhead stays smaller
 than what it replaces.
 
-**The top tier is the session's model, and that's also the fallback.**
-Nothing in the policy names a model: the planner and the sign-off
-inherit the session's model, and the implementer and reviewer default
-to the step-down alias. When the top tier's usage budget is exhausted,
-switch the session to the step-down model for the rest of the window —
-the planner and sign-off then run there too, nothing else changes, and
-the tier log records what actually ran. Check whether the client's
-model picker offers an automatic version of this before doing it by
-hand.
+**Two names, one place.** The constitution's model policy names the
+top tier and the step-down tier once; everything else refers to the
+roles. The session's model and effort are set in the project's
+`.claude/settings.json`, so they hold without anyone remembering. The
+fallback, when the top tier's budget is exhausted: drop the override on
+the planner and sign-off dispatches for the rest of the window, and log
+what ran.
+
+**Cache re-sends are the cost, so context size and turn count are the
+levers.** On the measured sessions, cache reads were 97% of all
+tokens. Clear at every phase boundary and at spec end — the skill
+resumes cold from `tasks.md` for free; compact mid-phase only if the
+context grows large; never clear mid-task. Keep spec conversations in
+their own session, cleared afterward. Batch bookkeeping into single
+shell commands. Each turn saved is a re-send of the whole context
+saved.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
@@ -580,7 +593,7 @@ for a condition that no longer holds. Instead, once `spec.md` is
 approved: the orchestrating session assembles a planning bundle with
 shell — the spec, the previous spec's `plan.md` and `tasks.md` as the
 pattern, a file listing — and dispatches the `sdd-planner` subagent
-(`assets/sdd-planner.md`) on it, once, at its own tier. The planner
+(`assets/sdd-planner.md`) on it, once, at the top tier. The planner
 reads the code the spec touches, writes both files marked Draft, and
 returns a summary with its token usage for the tier log. The
 orchestrator commits the drafts to the spec branch with the PR still in
