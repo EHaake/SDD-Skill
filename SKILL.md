@@ -315,14 +315,15 @@ How the loop runs, per task, in the orchestrating session:
    visual checks are the implementer's Verify criterion or the person's
    attestation at the phase pause. On the first measured specs, "folded
    in by the orchestrator" and "seen by the orchestrator" were
-   recurring log entries — each one the top-tier session doing work the
-   tiering exists to move off it.
+   recurring log entries — each one the orchestrating session doing
+   work the tiering exists to move off it.
 6. **Sequential, one task at a time, and drop the carried context at
    each phase boundary.** Commit-per-task and shared files make
    parallel implementers messy; parallel dispatch is a deliberate
-   opt-in for a later day, not the default. At a phase pause, compact
-   or start a fresh session — either is fine; the point is that the
-   top-tier context doesn't carry the whole spec.
+   opt-in for a later day, not the default. At a phase pause, `/clear`
+   and resume from the first unchecked task; compact only mid-phase if
+   the context grows large. The orchestrator's context is re-sent on
+   every turn, and it must not carry the whole spec.
 
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
@@ -355,7 +356,7 @@ tier; a whole-codebase sweep at the top tier; and one orchestrator
 session accumulating the entire spec. The loop cap, the bundles, the
 verification command, the sweep bound, and the per-phase session are
 the response. If a spec measured under those still loses to the
-single-session regime on the top-tier budget, roll the implementer
+single-session regime on the top tier's budget, roll the implementer
 layer back and keep only the reviewer changes: the structural argument
 for dispatch — cheaper rates on the bulk of the work, small fresh
 contexts — holds only while the coordination overhead stays smaller
@@ -406,6 +407,53 @@ overrides it up for sign-off and decision reviews only. See "Keeping
 reviews cheap" in the collaboration workflow for the reasoning, and for
 the bundles that keep every review — and every implementer dispatch —
 from reading the codebase at all.
+
+## The flow at a glance: where each step runs, and on what
+
+Everything above, laid out as the sequence a spec actually follows.
+"Fable" and "Opus" here stand for the top tier and the step-down tier
+named in the project's `CLAUDE.md` model policy; the roles are what's
+fixed, the names change as models do.
+
+**A brand-new project, once.** Nothing has a codebase yet, so nothing
+needs Claude Code until implementation:
+
+| Step | Where | Model | Who's talking |
+|---|---|---|---|
+| Idea conversation | Chat | Fable | the person and Claude |
+| Constitution → `CLAUDE.md` + `.claude/settings.json` | Chat, then committed | Fable | the person and Claude |
+| First spec → `spec.md` | Chat | Fable | the person and Claude |
+| First plan and tasks | Chat | Fable | Claude drafts; sign-off per involvement level |
+| Implementation | Claude Code | Opus session; Opus implementers | orchestrator |
+
+**Every spec after that.** The project's `.claude/settings.json` opens
+every Claude Code session on Opus at medium effort; the agent
+definitions and the orchestrator's overrides do the rest:
+
+| Step | Where | Model | Who's talking |
+|---|---|---|---|
+| Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Opus, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
+| Spec approved | `/clear` | — | — |
+| Plan and tasks drafted | Claude Code, new session | Opus session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
+| Sign-off | same session | `skeptical-reviewer` at **Fable, high**; one review, at most one re-review | orchestrator → reviewer |
+| Spec-conformance summary | same session | Opus | orchestrator → the person |
+| Implementation, per task | same session | `sdd-implementer` at **Opus, high**, on a task bundle | orchestrator → implementer |
+| Marked per-task review | same session | `skeptical-reviewer` at **Opus, high** | orchestrator → reviewer |
+| Phase review | same session | `skeptical-reviewer` at **Opus, high**, on a phase bundle | orchestrator → reviewer |
+| Phase pause report | same session | Opus | orchestrator → the person, who attests by using the app |
+| Phase boundary | `/clear`, new session | Opus, medium | — |
+| Pre-merge sweep | last phase's session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
+| Close-out and merge | same session | Opus | orchestrator |
+
+**The one manual step** is the model switch at the top of each spec
+session. The session prompts for it; it can't be automated, because a
+session has exactly one model and the project default is the step-down
+tier. Everything else resolves from `.claude/settings.json`, the agent
+frontmatter, and the orchestrator's overrides.
+
+**Fable's footprint per spec** is the spec conversation, one planner
+run, one sign-off (plus at most one re-review), and any routine-but-real
+decision reviews. Everything that has a turn count runs on Opus.
 
 ## Principles worth generalizing
 
@@ -496,12 +544,14 @@ writer, and it needs different handling:
 
 ## Session and context hygiene
 
-- In Claude Code, `/clear` at natural phase boundaries is usually
-  *better* than `/compact`, specifically because a project with real
-  documentation discipline loses almost nothing when the conversation
-  resets — `CLAUDE.md` re-reads automatically, and `tasks.md` is exactly
-  the file designed to answer "where was I" cold. `/compact` is for
-  staying mid-task without interrupting flow.
+- In Claude Code, `/clear` at every phase boundary and at spec end —
+  not `/compact` — because a project with real documentation
+  discipline loses almost nothing when the conversation resets:
+  `CLAUDE.md` re-reads automatically, and `tasks.md` is exactly the
+  file designed to answer "where was I" cold. Measured across real
+  sessions, cache re-sends of carried context were 97% of all tokens,
+  so the carried context *is* the cost. `/compact` is for staying
+  mid-phase when the context has grown large; never clear mid-task.
 - In a chat interface without that command, the equivalent move is
   starting a fresh conversation with the project's key documents
   uploaded to its knowledge base — same principle, same payoff, since
