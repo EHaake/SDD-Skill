@@ -99,10 +99,13 @@ names as models change; the roles don't. -->
   with an explicit per-call override to the top tier's name. The three
   agent definitions carry `effort: high`, which overrides the session's
   medium, so reasoning stays at full strength where it matters.
-- **Spec conversations happen in the Chat tab**, at the top tier,
-  with no codebase to carry — a Claude Code session in this repo
-  starts at the step-down tier, and only the person can pick otherwise
-  for a single session. Planning stays here, where the code is.
+- **Spec conversations happen in a Claude Code session of their own**,
+  at the top tier, and end when the spec is approved — never inside an
+  orchestrating session. A session in this repo opens at the step-down
+  tier, so a spec session states its model first and, if it's the
+  step-down tier, asks the person to pick the top tier for this
+  session only before continuing. (The project's very first spec, with
+  no codebase yet, happened in chat.)
 - **The `skeptical-reviewer` runs one tier down by default** (its
   definition says `opus`) for per-phase reviews, the per-task reviews
   the planner marks, and the pre-merge sweep. Each

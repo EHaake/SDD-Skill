@@ -176,7 +176,8 @@ the spec-conformance summary to the person (product-owner level), or
 the drafts themselves (technical lead).
 
 A first spec, with no code to plan against, has no planner: the plan is
-drafted in chat, per the authorship phase transition.
+drafted in chat along with the spec, per the authorship phase
+transition.
 
 ## The dispatch loop: who does the typing
 

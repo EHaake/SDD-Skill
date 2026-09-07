@@ -25,14 +25,16 @@ resume cold than one that doesn't.
 
 ## The three-tool division of labor
 
-- **Claude (chat)** is the planning partner — narrowing scope, resolving
-  ambiguity, arguing about a design decision, asking the question that
-  saves a rewrite later. This is cheap, fast iteration for the *what
-  and why* — the idea, the constitution, every `spec.md` — none of
-  which needs repo access to think well. Early in a project it also
-  authors `plan.md` and `tasks.md`; once the project has shipped code,
-  that authorship moves to Claude Code (see "Who authors plan.md and
-  tasks.md" below).
+- **Claude (chat)** is the planning partner at a project's start —
+  narrowing scope, resolving ambiguity, arguing about a design
+  decision, asking the question that saves a rewrite later. It hosts
+  the idea conversation, the constitution, and the first `spec.md`,
+  none of which has a codebase to look at yet, and early in a project
+  it also authors `plan.md` and `tasks.md`. Once the project has
+  shipped code, every later spec conversation moves into Claude Code
+  too (see "Spec conversations" under "Model tiering"), and plan and
+  task authorship moves to the `sdd-planner` (see "Who authors plan.md
+  and tasks.md" below).
 - **Claude Design** (if the project has a UI) produces visual references
   — screens, a token system, a written brief — not literal source code
   for a native app. Its output is HTML/CSS underneath. For a web app that
@@ -369,14 +371,20 @@ so they hold without anyone remembering. The fallback, when the top
 tier's budget is exhausted: drop the override on the planner and
 sign-off dispatches for the rest of the window, and log what ran.
 
-**Spec conversations happen in chat, not in the orchestrating
-session.** A session has one model, set at start; with the project
-default at the step-down tier, a spec conversation held in Claude Code
-would run there too unless the person picks the top tier for that one
-session by hand. The Chat tab has no such problem: it's the top tier at
-the person's chat setting, it carries no codebase, and `spec.md` needs
-none — which is what the authorship section already says. Planning
-stays in Claude Code, where the code is.
+**Spec conversations: chat at the project's start, Claude Code
+after.** The idea conversation, the constitution, and the first spec
+happen in chat — there is no codebase yet, and chat is the top tier at
+the person's own setting. Every later spec conversation happens in
+Claude Code, in a session of its own that ends when the spec is
+approved — never inside an orchestrating session, whose context is the
+cost the tiering exists to contain. One constraint the skill can't
+design around: a session has one model, set at start, and this
+project's default is the step-down tier. So a spec session opens by
+stating which model it's running, and if that's the step-down tier, it
+asks the person to pick the top tier for this session only before the
+conversation continues. That is the single picker choice in the whole
+workflow — and it's a choice about where the person's own thinking
+runs, not bookkeeping, which is why it's the one left to them.
 
 **Cache re-sends are the cost, so context size and turn count are the
 levers.** On the measured sessions, cache reads were 97% of all
@@ -581,10 +589,12 @@ side (real infra stakes, a team involved), and follow that instead.
 1** — the constitution already exists and stays in force unless this
 particular feature genuinely requires amending it, per `CLAUDE.md`'s own
 rule (amend explicitly, in its own commit, before the spec proceeds).
-Steps 0 and 2 still happen the same way, in chat — a second or tenth
-spec doesn't skip the idea-and-design phase just because the project
-already has a working codebase. Steps 3 and 5, though, change hands
-once the project has shipped code — see the next section.
+Steps 0 and 2 still happen the same way, as a conversation with the
+person — in Claude Code now, in a spec session of its own at the top
+tier (see "Spec conversations" under "Model tiering") — a second or
+tenth spec doesn't skip the idea-and-design phase just because the
+project already has a working codebase. Steps 3 and 5, though, change
+hands once the project has shipped code — see the next section.
 
 ## Who authors plan.md and tasks.md: a phase transition
 
@@ -619,9 +629,11 @@ discardable context, bounded by the bundle, instead of in the session
 that then carries it through every sign-off round and into
 implementation.
 
-**`spec.md` stays in chat in both phases.** It captures product intent,
-user-facing behavior, and decisions — the design conversation's actual
-job — and needs no repo access to write well.
+**`spec.md` stays a conversation with the person in both phases** —
+in chat for the first spec, in a dedicated Claude Code spec session
+after. It captures product intent, user-facing behavior, and decisions
+— the design conversation's actual job — and the model writing it
+should be reasoning about the product, not reading the code.
 
 **Who signs off depends on involvement level, and this is the one place
 the levels differ materially.** At the technical-lead level, the person
@@ -645,8 +657,8 @@ Two risks worth naming, both covered by machinery the workflow already
 has. A planner with the code open may anchor on what's easy to build
 over what's right — but Plan Mode separates thinking from doing, the
 skeptical-reviewer exists precisely to challenge convenient answers,
-and the spec, authored in chat without implementation anchoring,
-remains the contract the plan is reviewed against. And a product
+and the spec, authored in conversation without implementation
+anchoring, remains the contract the plan is reviewed against. And a product
 decision surfacing mid-plan could get settled silently in `plan.md` —
 but the escalation rule already covers this: anything that turns out to
 be a product decision goes back to the person (in practice, back to
@@ -718,8 +730,9 @@ ended at merge. Handle it on a spectrum, matching its actual size:
   rework and a direction-changing unknown are exactly the signal that a
   "bug fix" has actually turned into something needing the real
   spec → plan → tasks treatment before more code gets written — the
-  spec in chat, the plan and tasks per the authorship phase transition
-  above (which, for a project with shipped code, means Claude Code).
+  spec in its own session with the person, the plan and tasks per the
+  authorship phase transition above (which, for a project with shipped
+  code, means the `sdd-planner`).
 
 The existing per-task triage (see "The collaboration workflow" and
 `references/collaboration-workflow.md`) already governs how much
