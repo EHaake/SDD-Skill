@@ -361,11 +361,22 @@ than what it replaces.
 
 **Two names, one place.** The constitution's model policy names the
 top tier and the step-down tier once; everything else refers to the
-roles. The session's model and effort are set in the project's
-`.claude/settings.json`, so they hold without anyone remembering. The
-fallback, when the top tier's budget is exhausted: drop the override on
-the planner and sign-off dispatches for the rest of the window, and log
-what ran.
+roles. The session's model and effort live in the project's
+`.claude/settings.json`, written at setup from
+`assets/settings-template.json` and recreated by the orchestrator if
+missing — project settings outrank the app's picker for new sessions,
+so they hold without anyone remembering. The fallback, when the top
+tier's budget is exhausted: drop the override on the planner and
+sign-off dispatches for the rest of the window, and log what ran.
+
+**Spec conversations happen in chat, not in the orchestrating
+session.** A session has one model, set at start; with the project
+default at the step-down tier, a spec conversation held in Claude Code
+would run there too unless the person picks the top tier for that one
+session by hand. The Chat tab has no such problem: it's the top tier at
+the person's chat setting, it carries no codebase, and `spec.md` needs
+none — which is what the authorship section already says. Planning
+stays in Claude Code, where the code is.
 
 **Cache re-sends are the cost, so context size and turn count are the
 levers.** On the measured sessions, cache reads were 97% of all
@@ -532,7 +543,12 @@ side (real infra stakes, a team involved), and follow that instead.
    level (see "Involvement level" above — ask once, directly, and
    default to product owner) — write `CLAUDE.md` before any code
    exists, so the first thing Claude Code reads when it scaffolds the
-   project is the constitution, not its own defaults. Move through
+   project is the constitution, not its own defaults. The same step
+   writes `.claude/settings.json` from `assets/settings-template.json`
+   — the session model and effort the model policy relies on — and
+   commits it with the constitution. The person never creates this by
+   hand; it's part of scaffolding, and the orchestrator recreates it
+   if it's ever missing. Move through
    this efficiently once the idea is settled: when someone doesn't have
    a strong preference on a technical choice, recommend a sensible
    default and explain briefly why, rather than opening it up as an
@@ -717,8 +733,10 @@ spec" was never written with work-that-isn't-a-spec in mind.
 `assets/` has starting points for the four core documents —
 `CLAUDE-template.md`, `spec-template.md`, `plan-template.md`, and
 `tasks-template.md` — plus `design-brief-template.md` for projects with
-a UI, and three ready-to-use Claude Code subagent definitions:
-`skeptical-reviewer.md`, `sdd-implementer.md`, and `sdd-planner.md`.
+a UI, `settings-template.json` (the project's `.claude/settings.json`,
+written at setup), and three ready-to-use Claude Code subagent
+definitions: `skeptical-reviewer.md`, `sdd-implementer.md`, and
+`sdd-planner.md`.
 The document
 templates are skeletons with placeholders and inline guidance
 comments, not fill-in-the-blank forms — expect to restructure sections

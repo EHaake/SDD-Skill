@@ -25,6 +25,8 @@ assets/
   plan-template.md              plan.md skeleton
   tasks-template.md             tasks.md skeleton
   design-brief-template.md      brief.md skeleton, for projects with a UI
+  settings-template.json        .claude/settings.json a project gets at
+                                 setup: session model and effort
   skeptical-reviewer.md         Source copy of the reviewer subagent —
                                  see "Installing" below for where the
                                  active copy actually lives

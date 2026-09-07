@@ -79,12 +79,15 @@ names as models change; the roles don't. -->
   names are the only place a model is spelled out; everything below
   refers to them.
 - **The session runs at the step-down tier, at medium effort**, set in
-  this repo's `.claude/settings.json` so no one has to remember it:
-  `"model": "opus"`, `"effortLevel": "medium"`, and the same level
-  under `"modelSettings"` for the step-down model's full ID. Project
-  settings outrank user settings, so a model picked in the app's
-  picker only affects the session it was picked in — new sessions in
-  this repo start here regardless. The
+  this repo's `.claude/settings.json` — written at project setup from
+  the skill's `assets/settings-template.json` (`"model": "opus"`,
+  `"effortLevel": "medium"`, and the same level under
+  `"modelSettings"` for the step-down model's full ID). If that file
+  is missing or lacks these keys, recreate it from the template and
+  commit it before dispatching anything; nobody creates it by hand.
+  Project settings outrank user settings, so a model picked in the
+  app's picker only affects the session it was picked in — new
+  sessions in this repo start here regardless. The
   orchestrating session takes thousands of bookkeeping turns and
   re-sends its whole context on each one; measured across the first
   specs, that re-send volume was eight to nine times the implementers'
@@ -96,8 +99,10 @@ names as models change; the roles don't. -->
   with an explicit per-call override to the top tier's name. The three
   agent definitions carry `effort: high`, which overrides the session's
   medium, so reasoning stays at full strength where it matters.
-- **Spec conversations happen in their own session**, cleared
-  afterward (or in chat, which has no codebase to carry at all).
+- **Spec conversations happen in the Chat tab**, at the top tier,
+  with no codebase to carry — a Claude Code session in this repo
+  starts at the step-down tier, and only the person can pick otherwise
+  for a single session. Planning stays here, where the code is.
 - **The `skeptical-reviewer` runs one tier down by default** (its
   definition says `opus`) for per-phase reviews, the per-task reviews
   the planner marks, and the pre-merge sweep. Each
