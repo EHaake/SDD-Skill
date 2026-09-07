@@ -87,7 +87,10 @@ names as models change; the roles don't. -->
   commit it before dispatching anything; nobody creates it by hand.
   Project settings outrank user settings, so a model picked in the
   app's picker only affects the session it was picked in — new
-  sessions in this repo start here regardless. The
+  sessions in this repo start here regardless. The app's effort
+  indicator may show the model's default rather than the level in
+  effect; `/effort status` inside the session is the authoritative
+  check. The
   orchestrating session takes thousands of bookkeeping turns and
   re-sends its whole context on each one; measured across the first
   specs, that re-send volume was eight to nine times the implementers'
