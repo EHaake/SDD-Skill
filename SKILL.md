@@ -397,6 +397,25 @@ their own session, cleared afterward. Batch bookkeeping into single
 shell commands. Each turn saved is a re-send of the whole context
 saved.
 
+**Why the orchestrator isn't the top tier, and isn't at high
+effort.** "A stronger orchestrator makes fewer mistakes, so it's
+cheaper in the long run" is true wherever the orchestrator makes
+judgment calls — and the policy routes every judgment call elsewhere:
+design to the planner and sign-off, correctness to the verification
+command and the reviewer, product questions to the person. What's left
+is procedure, whose errors are cheap and self-revealing (a bad bundle
+fails verification; the cost is one re-dispatch) and don't compound.
+That bounded cost is traded against a tier premium on every turn of
+every task, in the longest-lived context of the workflow. Medium
+effort is the same reasoning applied to behavior: high effort makes a
+session investigate before acting, and everything a hands-off
+orchestrator reads inflates every later re-send. The cost side is
+measured; the quality side is design intent, untested until a tier log
+shows procedural misses. If one does, the order of experiments is
+step-down at high effort first, top tier second — the full record and
+the reasons for that order are in
+`references/model-tiering-rationale.md`.
+
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
 involvement level. The two are orthogonal — a product owner never sees
