@@ -250,6 +250,37 @@ report is the cheapest escalation in the whole workflow — it costs one
 subagent run — so treat it as the system working, not as a failure to
 route around.
 
+**When the walkthrough finds something.** At the phase pause the
+person uses the app and reports back. A report that something is wrong
+is a finding against an acceptance criterion, in the person's words —
+not a task line, and not something to diagnose in the session. Restate
+it (which criterion or task, what was seen, what the spec says),
+confirm the restatement if it isn't obvious, and dispatch a diagnosis
+bundle:
+
+```
+{ echo "## Report (person's words)"; cat scratch/report.txt;
+  echo "## Restatement";             echo "Sorting by date shows newest last; spec criterion 3 says newest first. From T014.";
+  echo "## Task";                    grep -n "T014" specs/004-search/tasks.md;
+  echo "## Plan section";            sed -n '/^## Search results/,/^## /p' specs/004-search/plan.md;
+  echo "## Acceptance criterion";    sed -n '/^3\./,/^4\./p' specs/004-search/spec.md;
+  echo "## Files";                   git show --stat --format= <T014 commit> | sed '$d';
+} > scratch/T014a-diagnosis.md
+```
+
+> "Diagnosis dispatch for a walkthrough finding on T014. Your bundle is
+> scratch/T014a-diagnosis.md. Find the cause; fix it only if the fix
+> is routine and inside the footprint, and add the test that would
+> have caught it. Otherwise return the diagnosis and options. Report
+> per your definition."
+
+Route the return the same way as any other: a fix → verify, commit,
+log it as `T014a` in `tasks.md`; options → a decision review at the
+top tier (Steps 2–3), transcribe, dispatch; a product question → the
+person, and a spec amendment before any code changes. The next pause
+report tells the person what was reported, what was found, and what
+changed, in their terms.
+
 **Clear at every phase boundary and at spec end.** Cache re-sends —
 context size times turn count — were 97% of all tokens on the measured
 sessions, so the carried context is the cost, and a phase boundary is

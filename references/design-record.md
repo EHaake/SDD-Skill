@@ -168,6 +168,17 @@ comparison. The `sdd-planner` definition changed from `model:
 inherit` to `model: opus` so that the top-tier fallback lands on the
 implementation tier rather than the session tier.
 
+One gap surfaced while deciding this: the person's walkthrough report
+at a phase pause ("this looks wrong") had no defined handling, which
+left the session improvising a diagnosis — a judgment the tiering is
+meant to keep off it, under any model. It got a path of its own:
+restate (session), diagnose in a dispatch (implementation tier, with
+a diagnosis mode added to the implementer definition), route the
+return (fix → sub-lettered task; options → decision review at the top
+tier; spec ambiguity → product question to the person). Defining the
+path was the fix regardless of tier; with it defined, the tier
+argument for the session is unchanged.
+
 ---
 
 ## Tiering by role at execution time, not by a table written in advance

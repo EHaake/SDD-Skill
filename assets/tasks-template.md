@@ -108,6 +108,14 @@ is documented:
    detail lives in plan.md and the commit log for anyone who wants it;
    it doesn't lead the report.
 
+What the person reports back from the walkthrough — "this looks
+wrong," "that didn't happen" — is a finding against an acceptance
+criterion, not a task line. The orchestrator restates it, dispatches
+a diagnosis bundle to the implementer, and routes the return (see the
+constitution's model policy). A fix is logged here as a sub-lettered
+task under the task it corrects; a product question goes back to the
+person before any code changes.
+
 ## Tier log (recommended for the first spec under a model policy)
 
 <!-- The constitution's model policy decides which tier runs each task
@@ -129,5 +137,6 @@ stay true after it changes again. -->
 | Planning: sign-off | fable | [...] | fix and re-review ×1, then signed off |
 | T001 | opus | [...] | verified first try |
 | T001 review | opus | [...] | signed off; scope statement matched the bundle |
+| T014a (walkthrough finding) | opus | [...] | diagnosed and fixed in one dispatch; test added |
 | Phase 2 review | opus | [...] | signed off; phase bundle |
 | Pre-merge sweep | opus | [...] | signed off; documents + spec diff |

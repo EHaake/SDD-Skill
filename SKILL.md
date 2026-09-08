@@ -319,6 +319,35 @@ the orchestrator considers well-specified, the orchestrator does that
 task itself and notes the miss in `tasks.md`. A tier assignment is a
 guess to verify, and the misses are the data.
 
+**When the person's walkthrough finds something wrong.** At a phase
+pause the person attests by using the app, and what they report back
+is a finding against an acceptance criterion, in user terms. It is
+not a task line, so it gets its own path, and the session's part of
+it is procedure:
+
+1. **Restate it, don't diagnose it.** Which acceptance criterion or
+   task it touches, what the person saw, what the spec says should
+   happen — and confirm the restatement with the person if it isn't
+   obvious. Diagnosis is investigation, and investigation isn't done
+   in the session.
+2. **Dispatch a diagnosis bundle** to the implementer: the report in
+   the person's words, the restatement, the task line, the plan
+   section, the acceptance criterion, and the files that task touched.
+   The implementer finds the cause; if the fix is routine and inside
+   the footprint, it makes it and verifies; otherwise it returns the
+   diagnosis and the options it can see, without picking one.
+3. **Route the return.** A fix → verify, commit, and log it as a
+   sub-lettered task (`T014a`), so the tier log shows what the
+   walkthrough caught. Options → a decision review at the top tier,
+   then transcribe and dispatch. A finding that turns out to be the
+   spec being ambiguous, or the person wanting different behavior →
+   a product question, back to the person; it becomes a spec
+   amendment before any code changes.
+
+The pause report that follows says, in plain language, what was
+reported, what was found, and what changed — or what still needs the
+person's decision.
+
 **A lighter implementer is available but off by default.** The
 dispatch can override the implementer's model per call — the session
 tier for a task that meets all three of: an existing automated check
@@ -425,6 +454,7 @@ definitions and the orchestrator's overrides do the rest:
 | Marked per-task review | same session | `skeptical-reviewer` at **Opus, high** | orchestrator → reviewer |
 | Phase review | same session | `skeptical-reviewer` at **Opus, high**, on a phase bundle | orchestrator → reviewer |
 | Phase pause report | same session | Sonnet | orchestrator → the person, who attests by using the app |
+| Walkthrough finding | same session | `sdd-implementer` at **Opus, high**, on a diagnosis bundle; a decision review at **Fable** if it returns options | the person → orchestrator → implementer |
 | Phase boundary | `/clear`, new session | Sonnet, medium | — |
 | Pre-merge sweep | last phase's session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
 | Close-out and merge | same session | Sonnet | orchestrator |

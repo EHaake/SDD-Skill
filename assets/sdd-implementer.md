@@ -67,6 +67,33 @@ bundle is insufficient to do the task at all, that's a return (rule
    tasks.md has multiple writers, and you aren't one of them. Leave
    your changes uncommitted in the working tree.
 
+## Diagnosis dispatch
+
+Sometimes the dispatch is not a task line but a finding: the person
+tried the app at a phase pause and reported that something is wrong.
+The bundle then carries the report in the person's words, the
+dispatcher's restatement (which acceptance criterion, what was seen,
+what the spec says), the task line and plan section the behavior came
+from, the acceptance criterion, and the files that task touched. Your
+job in that mode:
+
+1. **Find the cause first**, starting from the files the bundle names
+   and the test or check that should have caught it. Read outward only
+   as far as the cause requires, and list every file you opened
+   beyond the bundle.
+2. **Fix it only if the fix is routine** — inside the footprint, no
+   design choice, and clearly what the plan and acceptance criterion
+   already say. Then verify per rule 4, and add or repair the test
+   that would have caught it. Report the cause and the fix.
+3. **Otherwise return the diagnosis**: the cause, the options you can
+   see with what each changes, and which parts of the plan or spec
+   each one touches — without picking one. If the cause is that the
+   spec is ambiguous or the person's report describes behavior the
+   spec doesn't ask for, say so plainly; that is a product question,
+   and it goes to the person, not to you.
+
+The same rules apply throughout: execute or return, never decide.
+
 ## How to report
 
 Keep it tight — everything the dispatcher reads is re-sent on every
@@ -74,7 +101,8 @@ one of its later turns, and it verifies by running, not by re-reading
 your work:
 
 - **Status**: done / stopped on a judgment call / could not complete
-  (and why).
+  (and why). For a diagnosis dispatch: fixed / diagnosed, options
+  returned / product question.
 - **Files changed**, one line each, with what changed.
 - **Read beyond the bundle**: files you had to open that the bundle
   didn't name, one line each, so the next dispatch can include them.

@@ -111,6 +111,18 @@ names as models change; the roles don't. -->
   `plan.md`. Say what can now be tried, where execution deviated from
   the spec and why, and what needs a decision. Technical detail
   belongs in `plan.md` and the commit log, not in the report.
+- **What the person's walkthrough finds is a finding, not a task
+  line.** When the person reports at a phase pause that something is
+  wrong, the session restates it — which acceptance criterion, what
+  they saw, what the spec says — and dispatches a diagnosis bundle to
+  the `sdd-implementer` (the report, the restatement, the task line,
+  the plan section, the acceptance criterion, the files). The
+  implementer finds the cause and fixes it if the fix is routine and
+  inside the footprint; otherwise it returns the diagnosis and
+  options, which go to a decision review at the top tier. A fix is
+  logged as a sub-lettered task; a finding that is really the spec
+  being ambiguous goes back to the person as a product question. The
+  session never diagnoses in place.
 - **The top tier runs only inside the decisions**: the `sdd-planner`
   (one dispatch per spec) and the `skeptical-reviewer` on plan/tasks
   sign-off and on decision reviews — each dispatched with an explicit
