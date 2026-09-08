@@ -92,9 +92,11 @@ Each phase pause is also where the carried context gets dropped:
 compact, or start the next phase in a fresh session — either is fine —
 resuming from the first unchecked task.
 
-Every pause produces a report in this shape, in this order. The person
-may not be technical, and the report exists so they can act, not so
-the work is documented:
+Every pause produces a report in this shape, in this order, in plain
+language — short sentences, everyday words, no task IDs, agent names,
+or tier names, for a reader who won't open plan.md. The person may not
+be technical, and the report exists so they can act, not so the work
+is documented:
 
 1. **Why this pause** — a phase boundary, a spec-adherence question, or
    an escalation trigger. One line.
@@ -113,7 +115,7 @@ at dispatch time — there's no per-phase table to fill in. What's worth
 recording here is the evidence: token usage from each subagent return
 — implementer runs and reviewer invocations alike — any escape-hatch
 miss (a task the orchestrator had to redo itself, and why),
-and, if the third tier is on, which tasks it took and whether they held
+and, if the lighter implementer is on, which tasks it took and whether they held
 up. Compare the spec's total against a previous spec of similar size
 before treating the policy as settled. Drop this section once a project
 has that answer. The Tier column carries the resolved model name —

@@ -75,47 +75,62 @@ after every task the planner marked `review: per-task`.
 <!-- Decided once, alongside the involvement level. Adjust the tier
 names as models change; the roles don't. -->
 
-- **Tiers by name**: top tier `fable`; step-down `opus`. These two
-  names are the only place a model is spelled out; everything below
-  refers to them.
-- **The session runs at the step-down tier, at medium effort**, set in
+- **Tiers by name**: top tier `fable`; implementation tier `opus`;
+  session tier `sonnet`. These three names are the only place a model
+  is spelled out; everything below refers to the roles.
+- **The session runs at the session tier, at medium effort**, set in
   this repo's `.claude/settings.json` — written at project setup from
-  the skill's `assets/settings-template.json` (`"model": "opus"`,
-  `"effortLevel": "medium"`, and the same level under
-  `"modelSettings"` for the step-down model's full ID). If that file
-  is missing or lacks these keys, recreate it from the template and
-  commit it before dispatching anything; nobody creates it by hand.
-  Project settings outrank user settings, so a model picked in the
-  app's picker only affects the session it was picked in — new
-  sessions in this repo start here regardless. The app's effort
-  indicator may show the model's default rather than the level in
-  effect; `/effort status` inside the session is the authoritative
-  check. The
-  orchestrating session takes thousands of bookkeeping turns and
-  re-sends its whole context on each one; measured across the first
-  specs, that re-send volume was eight to nine times the implementers'
-  and was the dominant cost of the entire workflow. It doesn't need
-  the top tier or deep reasoning to assemble a bundle and tick a box.
+  the skill's `assets/settings-template.json` (`"model": "sonnet"`,
+  `"effortLevel": "medium"`, and a level under `"modelSettings"` for
+  each tier's full model ID). If that file is missing or lacks these
+  keys, recreate it from the template and commit it before dispatching
+  anything; nobody creates it by hand. Project settings outrank user
+  settings, so a model picked in the app's picker only affects the
+  session it was picked in — new sessions in this repo start here
+  regardless. The app's effort indicator may show the model's default
+  rather than the level in effect; `/effort status` inside the session
+  is the authoritative check. The orchestrating session takes many
+  bookkeeping turns and re-sends its whole context on each one — the
+  dominant cost of the workflow — and it makes no design decisions: it
+  assembles bundles, dispatches, verifies, commits, and reports. If it
+  drops the protocol (a skipped review, a stale `tasks.md` edit, a
+  task done by hand), the fallback is the implementation tier at
+  medium, one line in the same file.
+- **The session tier never resolves a design question.** When triage
+  finds a task that isn't routine, the session frames the question in
+  Plan Mode — so nothing is touched meanwhile — and dispatches the
+  `skeptical-reviewer` at the top tier on a decision bundle: the task
+  line, the plan section, the acceptance criteria, and the options as
+  the session sees them. It transcribes the recommendation into
+  `plan.md` and dispatches what remains. A product question `spec.md`
+  doesn't settle goes to the person instead.
+- **Everything the person reads is plain language.** Pause reports,
+  spec-conformance summaries, and questions use short sentences and
+  everyday words — no task IDs, agent names, tier names, or internal
+  shorthand unless the person asks — and assume the reader won't open
+  `plan.md`. Say what can now be tried, where execution deviated from
+  the spec and why, and what needs a decision. Technical detail
+  belongs in `plan.md` and the commit log, not in the report.
 - **The top tier runs only inside the decisions**: the `sdd-planner`
   (one dispatch per spec) and the `skeptical-reviewer` on plan/tasks
-  sign-off and on routine-but-real decision reviews — each dispatched
-  with an explicit per-call override to the top tier's name. The three
-  agent definitions carry `effort: high`, which overrides the session's
+  sign-off and on decision reviews — each dispatched with an explicit
+  per-call override to the top tier's name. The three agent
+  definitions carry `effort: high`, which overrides the session's
   medium, so reasoning stays at full strength where it matters.
 - **Spec conversations happen in a Claude Code session of their own**,
   at the top tier, and end with a new session (not `/clear`, which
   keeps the model) when the spec is approved — never inside an
-  orchestrating session. A session in this repo opens at the step-down
-  tier, so a spec session states its model first and, if it's the
-  step-down tier, asks the person to switch to the top tier for this
+  orchestrating session. A session in this repo opens at the session
+  tier, so a spec session states its model first and, if it isn't the
+  top tier, asks the person to switch to the top tier for this
   session — the model selector in the app, or `/model fable` — before
   continuing. `.claude/settings.json` pins effort per model, so
   picking the top tier brings high effort with it and the next session
-  still opens at the step-down tier. (The project's very first spec,
+  still opens at the session tier. (The project's very first spec,
   with no codebase yet, happened in chat.)
-- **The `skeptical-reviewer` runs one tier down by default** (its
-  definition says `opus`) for per-phase reviews, the per-task reviews
-  the planner marks, and the pre-merge sweep. Each
+- **The `skeptical-reviewer` runs at the implementation tier by
+  default** (its definition says `opus`) for per-phase reviews, the
+  per-task reviews the planner marks, and the pre-merge sweep. Each
   review gets a single bundle file assembled with shell — diff, task
   lines, plan sections, acceptance criteria; for the sweep, the
   documents and the spec's full diff — and reads nothing else.
@@ -125,8 +140,9 @@ names as models change; the roles don't. -->
   means it would fail an acceptance criterion or a test, or contradicts
   `plan.md` or `CLAUDE.md`; nothing else blocks. Anything open after
   the re-review goes to the tier log and the sweep.
-- **Implementation runs one tier down**, in the `sdd-implementer`
-  subagent, one task per dispatch, sequentially. The orchestrating
+- **Implementation runs at the implementation tier**, in the
+  `sdd-implementer` subagent (its definition says `opus`), one task
+  per dispatch, sequentially. The orchestrating
   session triages each task, dispatches routine ones on a task bundle
   assembled with shell (task line, plan section, acceptance criteria,
   files, the pattern file to copy), and on return verifies with the
@@ -145,16 +161,17 @@ names as models change; the roles don't. -->
   shell command; bundle assembly and dispatch back to back. Every turn
   saved is one fewer re-send of the whole context.
 - **Fallback**: if the top tier's usage budget runs out, dispatch the
-  planner and sign-off at the step-down tier for the rest of the
-  window (drop the override). Nothing else changes; the tier log
-  records what ran.
+  planner and sign-off at the implementation tier for the rest of the
+  window (drop the override; both definitions default to `opus`).
+  Nothing else changes; the tier log records what ran.
 - **Escape hatch**: two failed verifications on one task, or a "stopped
   on a judgment call" the orchestrator considers well-specified, and
   the orchestrator does that task itself, noting the
   miss in `tasks.md`.
-- **Third tier**: off. <!-- Turn on per project once the first spec's
-  tier log justifies it: "Sonnet for tasks with an automated Verify
-  check, a named pattern file, and a small footprint." -->
+- **Lighter implementer**: off. <!-- Turn on per project once the
+  first spec's tier log justifies it: "the session tier for tasks with
+  an automated Verify check, a named pattern file, and a small
+  footprint." -->
 - **Log token usage per implementer run and per reviewer invocation**,
   plus tier misses, in `tasks.md`'s tier log for the first spec under
   this policy, and compare against a previous spec before treating the

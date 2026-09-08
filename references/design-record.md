@@ -133,6 +133,41 @@ Decided September 2026, after two measured specs. Cost side measured;
 quality side untested. The next spec's tier log is the first evidence
 either way.
 
+### Then one tier further: the session below the implementation tier
+
+Shortly after, the session moved from the implementation tier (Opus)
+to a third, lower tier (Sonnet), for two reasons that reinforce each
+other:
+
+- **The same argument, applied again.** Once every judgment call is
+  routed off the orchestrator, there is no role-based reason for it
+  to sit on the implementation tier either. The one remaining
+  exposure was Step 2 of the per-task loop, where a non-routine task's
+  approach was researched and proposed *in the session* before the
+  reviewer saw it. That step was tightened at the same time: the
+  session now frames the question as a decision bundle and the
+  reviewer at the top tier recommends; the session transcribes. With
+  that closed, the session tier does nothing that needs Opus.
+- **Readability of what the person reads.** At the product-owner
+  level the pause report is the whole interface between the person
+  and the build, and the person found Opus 5's prose hard to read —
+  jargon-heavy, unusual word choices and sentence shapes. That is a
+  defect in the orchestrator role, not a cosmetic one, so "which model
+  writes clearly for this person" is a legitimate selection criterion
+  for this seat specifically. A plain-language rule for reports was
+  added to the constitution template at the same time, since it
+  applies to any model.
+
+Cost follows: cache reads on every orchestrator turn bill at the
+lower rate and draw less on the allowance. The order of experiments
+if the session tier drops the protocol is now: session tier at high
+effort; then the implementation tier as the session (Opus 4.8 was the
+person's stated preference for readability if Opus is needed at all);
+the top tier last. The measurement is the same tier log and ccusage
+comparison. The `sdd-planner` definition changed from `model:
+inherit` to `model: opus` so that the top-tier fallback lands on the
+implementation tier rather than the session tier.
+
 ---
 
 ## Tiering by role at execution time, not by a table written in advance

@@ -1,6 +1,6 @@
 ---
 name: sdd-implementer
-description: Executes exactly one well-specified task from a spec's tasks.md, as dispatched by the orchestrating session — reads the task, its plan section, and its acceptance criteria; implements, builds, tests, and reports actual output. Never decides an open design question; returns it instead. Runs one tier below the orchestrator by default.
+description: Executes exactly one well-specified task from a spec's tasks.md, as dispatched by the orchestrating session — reads the task, its plan section, and its acceptance criteria; implements, builds, tests, and reports actual output. Never decides an open design question; returns it instead. Runs at the implementation tier (opus) regardless of the session's model.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: opus
 effort: high
@@ -69,8 +69,9 @@ bundle is insufficient to do the task at all, that's a return (rule
 
 ## How to report
 
-Keep it tight — the dispatcher reads this at a higher-cost tier and
-verifies by running, not by re-reading your work:
+Keep it tight — everything the dispatcher reads is re-sent on every
+one of its later turns, and it verifies by running, not by re-reading
+your work:
 
 - **Status**: done / stopped on a judgment call / could not complete
   (and why).

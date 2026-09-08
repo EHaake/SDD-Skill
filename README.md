@@ -51,14 +51,15 @@ are for humans — nothing in this repo besides `SKILL.md`, `assets/`, and
 A project starts in chat, at the top tier: the idea, the constitution
 (which also writes the project's `.claude/settings.json`), and the first
 spec, plan, and tasks — nothing has a codebase yet. From then on,
-Claude Code sessions in the project open on the step-down tier at
+Claude Code sessions in the project open on the session tier at
 medium effort, automatically. Each later spec is a conversation in a
 Claude Code session of its own, switched to the top tier by the person
 (the only manual model choice in the workflow); once approved, an
 orchestrating session dispatches the planner and the sign-off at the
-top tier, then implements task by task through step-down implementers
-and per-phase reviews, pausing for the person at phase boundaries and
-clearing its context there. The full table — every step, where it
+top tier, then implements task by task through implementation-tier
+implementers and per-phase reviews, sending any real design question
+back up to the top tier rather than deciding it, pausing for the
+person at phase boundaries and clearing its context there. The full table — every step, where it
 runs, on which model, who's talking — is "The flow at a glance" in
 `SKILL.md`.
 

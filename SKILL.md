@@ -43,9 +43,9 @@ resume cold than one that doesn't.
   what's being built, not the chat history. Once shipped code exists it
   also drafts `plan.md` and `tasks.md`, through the `sdd-planner`, one
   dispatch per spec. During implementation it orchestrates rather than
-  types: each routine task goes to the `sdd-implementer` subagent one
-  tier down, and the session triages, verifies, and commits (see
-  "Model tiering").
+  types: each routine task goes to the `sdd-implementer` subagent at
+  the implementation tier, and the session triages, verifies, and
+  commits (see "Model tiering").
 
 ## Involvement level: decide it once, at the start
 
@@ -69,7 +69,11 @@ every pause. Two levels:
 Everything below that mentions a review, an approval, or a pause is
 written for the product-owner level unless it says otherwise; the
 technical-lead variant is the same flow with the person added back at
-those gates. Product owner is the default because a per-task pause a
+those gates. Whatever reaches the person — a pause report, a
+spec-conformance summary, a question — is written in plain language:
+short sentences, everyday words, no task IDs, agent names, or tier
+names, for a reader who won't open `plan.md`. The report exists so
+they can act, not so the work is documented. Product owner is the default because a per-task pause a
 non-technical person clicks through looks like review without being
 one — worse than no gate.
 
@@ -225,23 +229,31 @@ implements, the acceptance criteria it serves — never a fresh
 whole-codebase read; see "Keeping reviews cheap" in
 `references/collaboration-workflow.md`.
 
-## Model tiering: decisions at the top tier, execution one tier down
+## Model tiering: three roles, three tiers
 
-The best available model does the things that are genuinely
-decisions — the spec conversation, plan and task drafting (the
-`sdd-planner`, one dispatch per spec), and the skeptical-reviewer on
-sign-off and on routine-but-real decision reviews — and nothing else.
-The orchestrating session runs one tier down, at medium effort: it
-takes many bookkeeping turns and re-sends its whole context on each,
-which makes it the dominant cost of the workflow. The top tier reaches
-it only through explicit per-call overrides on the planner and
-sign-off dispatches; the agent definitions carry `effort: high` so
-reasoning stays full-strength inside them. Implementation — the edit,
-build, test loop that accounts for most of a spec's tokens — runs one
-tier down in the `sdd-implementer` subagent
-(`assets/sdd-implementer.md`), one task per dispatch, and the
-reviewer's per-phase and marked per-task checks run one tier down like
-the work they check.
+Three roles, each on its own tier, named once in the constitution's
+model policy:
+
+- **The top tier decides.** The spec conversation, plan and task
+  drafting (the `sdd-planner`, one dispatch per spec), and the
+  skeptical-reviewer on sign-off and on decision reviews — and
+  nothing else. It reaches the agents only through explicit per-call
+  overrides on those dispatches.
+- **The implementation tier builds and checks.** The `sdd-implementer`
+  (`assets/sdd-implementer.md`), one task per dispatch — the edit,
+  build, test loop that accounts for most of a spec's tokens — and the
+  skeptical-reviewer's per-phase and marked per-task checks, which
+  run on the same tier as the work they check. Both definitions pin
+  this tier by name, so it doesn't follow the session's model.
+- **The session tier orchestrates**, at medium effort. The
+  orchestrating session takes many bookkeeping turns and re-sends its
+  whole context on each, which makes it the dominant cost of the
+  workflow — and it makes no design decisions, so it runs below even
+  the implementation tier. Its one output a person reads is the pause
+  report, which is why it is also chosen for writing plainly.
+
+The agent definitions carry `effort: high`, so reasoning stays
+full-strength inside them regardless of the session's setting.
 
 The split is by *role*, decided per task at execution time — not a
 per-task model table written in advance. Three things catch a lighter
@@ -253,8 +265,12 @@ it hits a judgment call, and the reviewer sits at every phase boundary.
 How the loop runs, per task, in the orchestrating session:
 
 1. **Triage** (Step 1 of the collaboration workflow). Routine →
-   dispatch. Not routine → Plan Mode and the reviewer first, at the top
-   tier, until what remains is transcription; then dispatch that.
+   dispatch. Not routine → the session frames the question in Plan
+   Mode (so nothing is touched meanwhile) and dispatches the reviewer
+   at the top tier on a decision bundle — task line, plan section,
+   acceptance criteria, the options it can see — then transcribes the
+   recommendation into `plan.md` and dispatches what remains. The
+   session tier never resolves a design question itself.
 2. **Dispatch with a packet, not a pointer.** The subagent starts cold
    — it sees `CLAUDE.md`, its own definition, and the prompt. Name the
    task line, the `plan.md` section it implements, the `spec.md`
@@ -303,14 +319,15 @@ the orchestrator considers well-specified, the orchestrator does that
 task itself and notes the miss in `tasks.md`. A tier assignment is a
 guess to verify, and the misses are the data.
 
-**A third tier is available but off by default.** The dispatch can
-override the implementer's model per call — Sonnet for a task that
-meets all three of: an existing automated check as its Verify criterion
-(a manual-check task never drops tiers, because the orchestrator can't
-cheaply verify it), a named file in the codebase whose pattern it
-copies, and a small footprint. Leave it off until a project's first
-spec under this policy shows Opus dispatch working, then turn it on in
-that project's `CLAUDE.md` if the numbers justify it.
+**A lighter implementer is available but off by default.** The
+dispatch can override the implementer's model per call — the session
+tier for a task that meets all three of: an existing automated check
+as its Verify criterion (a manual-check task never drops tiers,
+because the orchestrator can't cheaply verify it), a named file in the
+codebase whose pattern it copies, and a small footprint. Leave it off
+until a project's first spec under this policy shows implementation-
+tier dispatch working, then turn it on in that project's `CLAUDE.md`
+if the numbers justify it.
 
 **Measure it.** The subagent's return reports its token usage; log it
 per invocation in `tasks.md`'s tier log with the resolved model name,
@@ -322,15 +339,19 @@ what it replaces; if a spec measured under it still loses to the
 single-session regime on the top tier's budget, roll the implementer
 layer back and keep the reviewer changes.
 
-**Two names, one place.** The constitution's model policy names the
-top tier and the step-down tier once; everything else refers to the
-roles. The session's model and effort live in the project's
+**Three names, one place.** The constitution's model policy names the
+top, implementation, and session tiers once; everything else refers
+to the roles. The session's model and effort live in the project's
 `.claude/settings.json`, written at setup from
 `assets/settings-template.json` and recreated by the orchestrator if
 missing — project settings outrank the app's picker for new sessions,
-so they hold without anyone remembering. The fallback, when the top
-tier's budget is exhausted: drop the override on the planner and
-sign-off dispatches for the rest of the window, and log what ran.
+so they hold without anyone remembering. Two fallbacks: when the top
+tier's budget is exhausted, drop the override on the planner and
+sign-off dispatches for the rest of the window (both definitions
+default to the implementation tier) and log what ran; and if the
+session tier drops the protocol — a skipped review, a stale `tasks.md`
+edit, a task done by hand — the session moves to the implementation
+tier, one line in the settings file.
 
 **Spec conversations: chat at the project's start, Claude Code
 after.** The idea conversation, the constitution, and the first spec
@@ -339,41 +360,43 @@ the person's own setting. Every later spec conversation happens in
 Claude Code, in a session of its own — never inside an orchestrating
 session, whose context is the cost the tiering exists to contain. A
 session has one model, set at start, and the project default is the
-step-down tier, so a spec session opens by stating which model it's
-running and, if that's the step-down tier, asks the person to pick the
+session tier, so a spec session opens by stating which model it's
+running and, if that isn't the top tier, asks the person to pick the
 top tier for this session only. That is the single picker choice in
 the whole workflow; it's a choice about where the person's own
 thinking runs, which is why it's the one left to them.
 
-**Why the orchestrator isn't the top tier, and isn't at high effort.**
-"A stronger orchestrator makes fewer mistakes" is true wherever the
-orchestrator makes judgment calls, and the policy routes every judgment
-call elsewhere: design to the planner and sign-off, correctness to the
-verification command and the reviewer, product questions to the
-person. What's left is procedure, whose errors are cheap and
-self-revealing and don't compound — traded against a tier premium on
-every turn of the longest-lived context in the workflow. Medium effort
-is the same reasoning applied to behavior: high effort makes a session
-investigate before acting, and everything a hands-off orchestrator
-reads inflates every later re-send. If a tier log shows procedural
-misses, the order of experiments is step-down at high effort first,
-top tier second; `references/design-record.md` has the full case.
+**Why the session runs below the implementation tier, at medium
+effort.** "A stronger orchestrator makes fewer mistakes" is true
+wherever the orchestrator makes judgment calls, and the policy routes
+every judgment call elsewhere: design to the planner, the sign-off,
+and the decision review, correctness to the verification command and
+the reviewer, product questions to the person. What's left is
+procedure, whose errors are cheap and self-revealing and don't
+compound — traded against a tier premium on every turn of the
+longest-lived context in the workflow. Medium effort is the same
+reasoning applied to behavior: high effort makes a session investigate
+before acting, and everything a hands-off orchestrator reads inflates
+every later re-send. If a tier log shows procedural misses, the order
+of experiments is the session tier at high effort first, the
+implementation tier as the session second, the top tier last;
+`references/design-record.md` has the full case.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
 involvement level — orthogonal settings, both decided once at the
-start. The skeptical-reviewer's definition defaults to one tier down
-(`model: opus`); the orchestrator overrides it up for sign-off and
-decision reviews only. See "Keeping reviews cheap" in the
+start. The skeptical-reviewer's definition defaults to the
+implementation tier (`model: opus`); the orchestrator overrides it up
+for sign-off and decision reviews only. See "Keeping reviews cheap" in the
 collaboration workflow for the bundles that keep every review — and
 every implementer dispatch — from reading the codebase at all.
 
 ## The flow at a glance: where each step runs, and on what
 
 Everything above, laid out as the sequence a spec actually follows.
-"Fable" and "Opus" here stand for the top tier and the step-down tier
-named in the project's `CLAUDE.md` model policy; the roles are what's
-fixed, the names change as models do.
+"Fable", "Opus", and "Sonnet" here stand for the top, implementation,
+and session tiers named in the project's `CLAUDE.md` model policy; the
+roles are what's fixed, the names change as models do.
 
 **A brand-new project, once.** Nothing has a codebase yet, so nothing
 needs Claude Code until implementation:
@@ -384,41 +407,43 @@ needs Claude Code until implementation:
 | Constitution → `CLAUDE.md` + `.claude/settings.json` | Chat, then committed | Fable | the person and Claude |
 | First spec → `spec.md` | Chat | Fable | the person and Claude |
 | First plan and tasks | Chat | Fable | Claude drafts; sign-off per involvement level |
-| Implementation | Claude Code | Opus session; Opus implementers | orchestrator |
+| Implementation | Claude Code | Sonnet session; Opus implementers | orchestrator |
 
 **Every spec after that.** The project's `.claude/settings.json` opens
-every Claude Code session on Opus at medium effort; the agent
+every Claude Code session on Sonnet at medium effort; the agent
 definitions and the orchestrator's overrides do the rest:
 
 | Step | Where | Model | Who's talking |
 |---|---|---|---|
-| Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Opus, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
+| Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Sonnet, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
 | Spec approved | **new session** — not `/clear`, which keeps the session's model | — | — |
-| Plan and tasks drafted | Claude Code, new session | Opus session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
+| Plan and tasks drafted | Claude Code, new session | Sonnet session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
 | Sign-off | same session | `skeptical-reviewer` at **Fable, high**; one review, at most one re-review | orchestrator → reviewer |
-| Spec-conformance summary | same session | Opus | orchestrator → the person |
+| Spec-conformance summary | same session | Sonnet | orchestrator → the person |
+| Non-routine task | same session | `skeptical-reviewer` at **Fable, high**, on a decision bundle; the session transcribes the recommendation | orchestrator → reviewer |
 | Implementation, per task | same session | `sdd-implementer` at **Opus, high**, on a task bundle | orchestrator → implementer |
 | Marked per-task review | same session | `skeptical-reviewer` at **Opus, high** | orchestrator → reviewer |
 | Phase review | same session | `skeptical-reviewer` at **Opus, high**, on a phase bundle | orchestrator → reviewer |
-| Phase pause report | same session | Opus | orchestrator → the person, who attests by using the app |
-| Phase boundary | `/clear`, new session | Opus, medium | — |
+| Phase pause report | same session | Sonnet | orchestrator → the person, who attests by using the app |
+| Phase boundary | `/clear`, new session | Sonnet, medium | — |
 | Pre-merge sweep | last phase's session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
-| Close-out and merge | same session | Opus | orchestrator |
+| Close-out and merge | same session | Sonnet | orchestrator |
 
 **The one manual step** is the model switch at the top of each spec
 session. The session prompts for it; it can't be automated, because a
-session has exactly one model and the project default is the step-down
+session has exactly one model and the project default is the session
 tier. Everything else resolves from `.claude/settings.json`, the agent
 frontmatter, and the orchestrator's overrides. Note the asymmetry:
 `/clear` resets context but keeps the session's model, which is right
-at a phase boundary (the session is already on the step-down tier) and
+at a phase boundary (the session is already on the session tier) and
 wrong after a spec session (it would leave planning and orchestration
 on the top tier) — so a spec session ends with a new session, not a
 clear.
 
 **Fable's footprint per spec** is the spec conversation, one planner
-run, one sign-off (plus at most one re-review), and any routine-but-real
-decision reviews. Everything that has a turn count runs on Opus.
+run, one sign-off (plus at most one re-review), and any decision
+reviews. Everything that edits code runs on Opus. Everything that has
+a turn count runs on Sonnet.
 
 ## Principles worth generalizing
 

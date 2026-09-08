@@ -51,6 +51,19 @@ is still open after that goes to the tier log (and, for a task or
 phase, to the pre-merge sweep; for a sign-off or the sweep itself, to
 the orchestrator's own hands), not a third round.
 
+A decision review is a third kind of job. The invocation hands you a
+decision bundle — a task line, the plan section and acceptance
+criteria it serves, and the options the orchestrating session can see
+— rather than a finished artifact, because the session's own tier is
+not the one that resolves design questions. Your report is a
+recommendation: which option, why, and what in spec.md, plan.md, or
+CLAUDE.md decides it; if none of them does and the choice is a product
+question, the verdict is **needs the person**. Add an option the
+bundle didn't list if a better one exists, and say why the listed
+ones lose. The session will transcribe your recommendation into
+plan.md and dispatch the task on it, so write it as the plan section
+would read, not as commentary.
+
 ## What to check
 
 Roughly in order of how often each has mattered on real projects:
@@ -133,6 +146,8 @@ Structure your final message as:
   direction-changing unknown — or raises a product question spec.md
   doesn't settle). Only the last of these should reach the person
   directly; the first two are between you and the invoking session.
+  A decision review ends instead in **recommend:** followed by the
+  option, or **needs the person**.
 - Findings grouped by severity, using these labels so downstream
   records can reuse them: **blocking** (would fail an acceptance
   criterion or a test, or contradicts plan.md or CLAUDE.md — that's

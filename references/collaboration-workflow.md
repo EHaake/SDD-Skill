@@ -72,15 +72,19 @@ genuinely settled earlier, not merely unexamined now. Worth being able
 to point to *where* a given decision was actually made, not just assert
 that it was.
 
-### Step 2 — Use Plan Mode
+### Step 2 — Frame it in Plan Mode
 
-Activate Plan Mode (`Shift+Tab` twice, or `/plan`) before letting Claude
-Code touch any files. Let it research read-only and propose an approach.
-At the technical-lead level, read the plan yourself — sometimes this
-alone resolves it: if the plan is obviously right, or obviously needs
-one small correction you can just state, do that and move on without
-further escalation. At the product-owner level the person doesn't read
-the plan; it goes straight to the subagent in Step 3, and only a
+Activate Plan Mode (`Shift+Tab` twice, or `/plan`) so nothing gets
+touched while the question is open. Under the model policy the session
+runs at the session tier, which is not the tier that resolves design
+questions — so the session's job here is to *frame*, not to propose:
+assemble a decision bundle with shell — the task line, the `plan.md`
+section, the `spec.md` acceptance criteria, any conflicting excerpts —
+and add the options it can see, without picking one. That bundle goes
+to the subagent in Step 3. At the technical-lead level, read the
+recommendation that comes back — sometimes that alone resolves it, or
+needs one small correction you can just state. At the product-owner
+level the person doesn't see it; it goes into `plan.md`, and only a
 product question inside it — something `spec.md` doesn't settle —
 comes back to the person.
 
@@ -98,25 +102,30 @@ to over-apply:
    implementation detail with a reasonable default, a genuine fork.
 
 **Routine-but-real** (the large majority of real decisions, including
-plenty that feel weighty in the moment) → invoke the subagent, resolve
-within the same session:
+plenty that feel weighty in the moment) → dispatch the
+skeptical-reviewer at the top tier on the decision bundle from Step 2,
+and resolve within the same session:
 
-> "Before I approve this, have the skeptical-reviewer check this plan
-> against CLAUDE.md and specs/004-search/spec.md and plan.md."
+> "Decision review for T014 in specs/004-search. The bundle is
+> scratch/T014-decision.md: the task line, the plan section, the
+> acceptance criteria, and the options I can see. Recommend one, per
+> your definition."
 
 The subagent starts cold: it sees the invocation prompt, CLAUDE.md,
 and a git status snapshot — nothing else from the session. Name the
-spec directory and the specific artifact under review in the prompt;
-it can't infer them from a conversation it never saw.
+spec directory and the bundle in the prompt; it can't infer them from
+a conversation it never saw. Its report is a recommendation written
+as the plan section would read; the session transcribes it into
+`plan.md`, commits, and dispatches the task — now routine — on it.
 
-At the technical-lead level, read its findings: if it flags something
-real, discuss with the main Claude Code session, revise, and optionally
-re-review; if it comes back clean, approve and let implementation
-proceed. At the product-owner level the same loop runs without the
-person: the main session fixes blocking findings, re-invokes the
-reviewer until it signs off, and proceeds. The person hears about it in
-the next pause report — or immediately, if a finding hits an escalation
-trigger or raises a product question `spec.md` doesn't settle.
+At the technical-lead level, read the recommendation: if it's wrong
+or needs a correction, state it and re-invoke once; if it's right, let
+implementation proceed. At the product-owner level the same loop runs
+without the person: the session transcribes, re-invokes at most once
+if the recommendation doesn't fit the spec, and proceeds. The person
+hears about it in the next pause report — or immediately, if the
+recommendation is **needs the person**: an escalation trigger, or a
+product question `spec.md` doesn't settle.
 
 **One of the two triggers** → do the subagent review as well, but also
 bring the specific question to a separate, fresh chat before finalizing
@@ -145,7 +154,7 @@ Once shipped code is what plans extend (see the skill's authorship
 section), the orchestrating session doesn't draft `plan.md` and
 `tasks.md` itself — it dispatches `sdd-planner`, once per spec, with a
 per-call override to the top tier named in `CLAUDE.md` (the session
-itself runs a tier down). The exploration a plan needs is the
+itself runs at the session tier). The exploration a plan needs is the
 expensive part of
 planning; it belongs in a discardable context bounded by a planning
 bundle, not in the session that then carries it through every
@@ -185,9 +194,10 @@ Under the model policy the constitution sets (see the skill's "Model
 tiering" section), the main session doesn't implement tasks itself; it
 orchestrates. Per task:
 
-1. Step 1 triage, as above. Routine → dispatch. Not routine → Plan Mode
-   and the reviewer until what remains is
-   transcription; then dispatch that.
+1. Step 1 triage, as above. Routine → dispatch. Not routine → frame
+   it in Plan Mode, decision review at the top tier (Steps 2–3),
+   transcribe the recommendation into `plan.md`; then dispatch what
+   remains.
 2. Assemble a task bundle with shell — the same move as the review
    bundle, so the content never enters the orchestrator's context —
    and dispatch `sdd-implementer` on it. The bundle carries the task
@@ -343,14 +353,13 @@ Scope by invocation type:
   spec; the first measured sweep read the codebase and cost more than
   five tasks, which is what the documents-and-diff bound is for.
 
-**Tier by invocation type.** The reviewer's definition defaults to one
-tier below the orchestrator (`model: opus`), which is right for
-per-phase and per-task reviews — checks of a diff against the plan
-sections it implements, and the frequent case. Override up to the
-top tier named in `CLAUDE.md` only where the reviewer is exercising
-judgment rather than checking transcription: plan/tasks sign-off and
-reviews of
-routine-but-real decisions from Step 3. The pre-merge sweep stays at
+**Tier by invocation type.** The reviewer's definition defaults to
+the implementation tier (`model: opus`), which is right for per-phase
+and per-task reviews — checks of a diff against the plan sections it
+implements, and the frequent case. Override up to the top tier named
+in `CLAUDE.md` only where the reviewer is exercising judgment rather
+than checking transcription: plan/tasks sign-off and the decision
+reviews from Step 3. The pre-merge sweep stays at
 the default tier — it's broad by design, which makes it the most
 expensive single invocation, and the orchestrator adjudicates its
 findings anyway. The default should be the frequent
