@@ -13,29 +13,99 @@ app. "The reference project" below means that first one.
 
 ---
 
-## Why the orchestrator runs one tier down, at medium effort
+## Model tiering: three tiers, and why the session is the lowest
 
-### The question
+### The rule
 
-If the top tier is the best model, why isn't it the orchestrator? A
-better orchestrator makes fewer mistakes, and fewer mistakes are
-cheaper in the long run even if each turn costs more up front. That
-argument is sound wherever it applies. The policy is built so that it
-applies as little as possible.
+Put the expensive model where the *decisions* are concentrated, not
+where the *turns* are. Everything in this section follows from that
+one rule and the measurement that motivated it.
+
+A Claude Code session re-sends its whole context on every turn. On
+the measured projects, those cache re-sends were about 97% of all
+tokens; thinking and output were the rest. So the cost of a role is,
+to a first approximation, the size of its context times the number
+of turns it takes — and the model's rate multiplies both. The roles
+in the workflow have very different shapes:
+
+| Role | Context lifetime | Turns | Judgment per turn |
+|---|---|---|---|
+| Orchestrating session | a whole phase, many tasks | many per task: bundle, dispatch, read report, verify, commit, tick, review, read verdict | almost none — procedure |
+| `sdd-implementer` | one task, then discarded | a handful | low — transcription of a settled plan |
+| Reviewer, per phase / per task | one bundle, then discarded | a few | moderate — checking a diff against a plan |
+| `sdd-planner` | one spec's planning, then discarded | tens | high — the architecture |
+| Sign-off, decision review | one bundle, then discarded | a few | high — the judgment calls |
+| Spec conversation | its own session | a conversation | high — product intent |
+
+The top tier belongs in the bottom three rows. The session, with the
+most turns and the least judgment, belongs on the cheapest tier that
+can follow a written protocol. That is the whole design; the rest is
+making sure the "least judgment" claim is actually true.
+
+### Every judgment call has a route away from the session
+
+```mermaid
+flowchart TD
+    Q{"What kind of call is it?"}
+    Q -->|"how to build the spec"| A["sdd-planner, then sign-off<br/>top tier"]
+    Q -->|"a task that isn't routine"| B["decision review<br/>top tier; the session frames and transcribes"]
+    Q -->|"is the work correct"| C["verification command, then reviewer<br/>implementation tier"]
+    Q -->|"the person tried it; something is wrong"| D["diagnosis dispatch to the implementer<br/>fix comes back, or options go to a decision review"]
+    Q -->|"what the product should do"| E["the person, as a spec question"]
+    Q -->|"none of these"| F["the session: bundle, dispatch, verify, commit, report"]
+```
+
+Each route was added when a gap showed the session improvising:
+
+- **Design** was never the session's: the planner and the sign-off
+  came in with the authorship transition (below).
+- **Non-routine tasks** were originally researched and proposed in
+  the session (Plan Mode), with the reviewer checking the proposal.
+  That was the one place the session did design work, and it was
+  closed when the session moved to the third tier: the session now
+  frames a decision bundle and the reviewer at the top tier
+  recommends, in a third invocation type added to its definition.
+- **Correctness** is the verification command plus the reviewer, and
+  the loop rules (verify by running, open the diff only on failure,
+  never fold in second-look notes by hand) keep the session from
+  re-doing that work itself.
+- **Walkthrough findings** had no path at all until the person asked
+  what happens when they report that something looks wrong at a
+  phase pause. The session was left to diagnose in place — a
+  judgment the tiering exists to keep off it, under any model. The
+  path added: restate (session), diagnose in a dispatch (implementer,
+  which gained a diagnosis mode), route the return.
+- **Product questions** were always the person's; the escalation
+  triggers and the planner's and reviewer's "needs the person"
+  verdict are how they get there.
+
+### Why "a stronger orchestrator makes fewer mistakes" doesn't win
+
+That argument is sound wherever the orchestrator makes judgment calls
+whose errors compound. With the routes above in place, what the
+session has left is procedure — build the bundle, follow the verdict,
+commit, don't edit `tasks.md` from a stale copy, don't do the task
+itself. Procedural errors are cheap and self-revealing: a badly
+assembled bundle fails verification or comes back "fix and
+re-review", and the cost is one extra dispatch. They don't compound
+into a wrong architecture, because the architecture was decided
+somewhere the top tier did look.
+
+So the trade is a bounded, occasional re-dispatch against a tier
+premium applied to every turn of every task. That favors the lowest
+tier that holds the protocol — and "holds the protocol" is the thing
+not yet measured. The cost side of this decision comes from data; the
+quality side comes from design intent. The tier log's "miss reason"
+column is where the quality side gets tested.
 
 ### What the measurement showed
 
 On the first specs measured under the policy, with the top tier
 orchestrating:
 
-- Cache reads were about 97% of all tokens. Every turn re-sends the
-  session's whole context, and that re-send — not the thinking, not
-  the output — is where the tokens go.
-- The orchestrating session is the longest-lived context in the
-  workflow. Per task it takes many turns: assemble the bundle,
-  dispatch, read the report, run verification, commit, tick the box,
-  dispatch the review, read the verdict. Its re-send volume was eight
-  to nine times the implementers' combined.
+- Cache reads were about 97% of all tokens.
+- The orchestrating session's re-send volume was eight to nine times
+  the implementers' combined.
 - A later spec cost more than an earlier one of similar size even
   after the implementer layer got cheaper. The orchestrator was where
   the savings were being spent.
@@ -43,51 +113,45 @@ orchestrating:
   consuming most of it — 82% of the weekly allowance at one point, on
   the role that needs it least.
 
-Whichever model sits in the orchestrator's seat pays its rate on the
-whole context, every turn, for the whole spec. The planner and the
-sign-off are the opposite shape: short-lived contexts with a dense
-concentration of judgment. So the tier goes where the *decisions* are
-concentrated, not where the *turns* are.
+That moved the session from the top tier to the implementation tier.
 
-### Why "fewer mistakes" mostly doesn't apply
+### Then one tier further: the session below the implementation tier
 
-The long-run argument holds when the orchestrator makes judgment calls
-whose errors compound. The policy routes those calls elsewhere on
-purpose:
+Shortly after, the session moved from the implementation tier (Opus)
+to a third, lower tier (Sonnet), for two reasons that reinforce each
+other:
 
-- **Design decisions** go to the `sdd-planner` and to the sign-off
-  review, both dispatched at the top tier, and to the person at phase
-  pauses.
-- **Correctness** is established by the constitution's verification
-  command and by the skeptical-reviewer, not by the orchestrator's
-  reading of a diff.
-- **What the orchestrator has left is procedure**: build the bundle,
-  follow the verdict, commit, don't edit `tasks.md` from a stale copy,
-  don't do the task itself.
+- **The same argument, applied again.** Once every judgment call is
+  routed off the orchestrator, there is no role-based reason for it
+  to sit on the implementation tier either. The one remaining
+  exposure — non-routine tasks designed in the session — was closed
+  at the same time (see the routes above). With that done, the
+  session tier does nothing that needs Opus.
+- **Readability of what the person reads.** At the product-owner
+  level the pause report is the whole interface between the person
+  and the build, and the person found Opus 5's prose hard to read —
+  jargon-heavy, unusual word choices and sentence shapes. That is a
+  defect in the orchestrator role, not a cosmetic one, so "which model
+  writes clearly for this person" is a legitimate selection criterion
+  for this seat specifically. A plain-language rule for reports was
+  added to the constitution template at the same time, since it
+  applies to any model.
 
-Procedural errors are cheap and self-revealing. A badly assembled
-bundle fails verification or comes back "fix and re-review", and the
-cost is one extra dispatch. It does not compound into a wrong
-architecture, because the architecture was decided somewhere the top
-tier did look.
-
-So the trade is a bounded, occasional re-dispatch against a tier
-premium applied to every turn of every task. That favors the step-down
-tier unless the step-down orchestrator turns out to be procedurally
-sloppy — which is the thing not yet measured. The cost side of this
-decision comes from data; the quality side comes from design intent.
-The tier log's "miss reason" column is where the quality side gets
-tested.
+Cost follows: cache reads on every orchestrator turn bill at the
+lower rate and draw less on the allowance. The `sdd-planner`
+definition changed from `model: inherit` to `model: opus` at the same
+time, so that the top-tier fallback lands on the implementation tier
+rather than the session tier.
 
 ### The allowance argument
 
 The top tier's allowance is the scarcest budget in the workflow, and
 the person asked that anything the top tier handles be able to fall
-back to the step-down tier when it runs out. With the orchestrator one
-tier down, only the spec conversation, the planner, and the sign-off
-ever draw on that allowance — all short. The fallback is then a
-one-line change (drop the override on two dispatches), not a
-mid-spec model switch in a long-running session.
+back when it runs out. With the top tier confined to the planner, the
+sign-off, decision reviews, and the spec conversation — all short —
+the fallback is a one-line change (drop the override on the
+dispatches; both agent definitions default to the implementation
+tier), not a mid-spec model switch in a long-running session.
 
 ### Why medium rather than high
 
@@ -107,79 +171,34 @@ small; the argument is behavioral, and plausible rather than measured.
 
 ### What would change the decision, and in what order
 
-1. **A tier log showing procedural misses by the orchestrator** —
-   bundles that missed a file the implementer needed, a review skipped,
-   a stale `tasks.md` edit, an escape hatch taken on a task that was
-   actually well-specified. First fix: the step-down tier at **high**
-   effort. One line in the project's `.claude/settings.json`
-   (`effortLevel`), and in `assets/settings-template.json` if it
-   should become the default.
-2. **Misses that persist at high effort** — then the top tier as
-   orchestrator, for one spec of similar size, with the `ccusage
-   session --breakdown` comparison afterward. Running the two
-   experiments in that order says whether the problem was effort or
-   tier, instead of guessing at both.
-3. **A policy change that hands the orchestrator judgment calls
-   again** — for example, if triage were ever widened so the
-   orchestrator resolved design questions inline rather than sending
-   them to Plan Mode and the reviewer. That would restore the "fewer
-   mistakes" argument and the tier should follow.
+1. **A tier log showing procedural misses by the session** — bundles
+   that missed a file the implementer needed, a review skipped, a
+   stale `tasks.md` edit, an escape hatch taken on a task that was
+   actually well-specified, a walkthrough finding diagnosed in place.
+   First fix: the session tier at **high** effort. One line in the
+   project's `.claude/settings.json` (`effortLevel`), and in
+   `assets/settings-template.json` if it should become the default.
+2. **Misses that persist at high effort** — then the implementation
+   tier as the session, for one spec of similar size, with the
+   `ccusage session --breakdown` comparison afterward. (Opus 4.8 was
+   the person's stated preference for readability if Opus is needed
+   in this seat at all.) Running the experiments in this order says
+   whether the problem was effort or tier, instead of guessing at
+   both.
+3. **The top tier as the session** only if both of the above fail.
+4. **A policy change that hands the session judgment calls again** —
+   for example, if triage were ever widened so the session resolved
+   design questions inline rather than sending them to a decision
+   review. That would restore the "fewer mistakes" argument and the
+   tier should follow.
 
 Absent one of those, the choice stands.
 
 ### Status
 
-Decided September 2026, after two measured specs. Cost side measured;
-quality side untested. The next spec's tier log is the first evidence
-either way.
-
-### Then one tier further: the session below the implementation tier
-
-Shortly after, the session moved from the implementation tier (Opus)
-to a third, lower tier (Sonnet), for two reasons that reinforce each
-other:
-
-- **The same argument, applied again.** Once every judgment call is
-  routed off the orchestrator, there is no role-based reason for it
-  to sit on the implementation tier either. The one remaining
-  exposure was Step 2 of the per-task loop, where a non-routine task's
-  approach was researched and proposed *in the session* before the
-  reviewer saw it. That step was tightened at the same time: the
-  session now frames the question as a decision bundle and the
-  reviewer at the top tier recommends; the session transcribes. With
-  that closed, the session tier does nothing that needs Opus.
-- **Readability of what the person reads.** At the product-owner
-  level the pause report is the whole interface between the person
-  and the build, and the person found Opus 5's prose hard to read —
-  jargon-heavy, unusual word choices and sentence shapes. That is a
-  defect in the orchestrator role, not a cosmetic one, so "which model
-  writes clearly for this person" is a legitimate selection criterion
-  for this seat specifically. A plain-language rule for reports was
-  added to the constitution template at the same time, since it
-  applies to any model.
-
-Cost follows: cache reads on every orchestrator turn bill at the
-lower rate and draw less on the allowance. The order of experiments
-if the session tier drops the protocol is now: session tier at high
-effort; then the implementation tier as the session (Opus 4.8 was the
-person's stated preference for readability if Opus is needed at all);
-the top tier last. The measurement is the same tier log and ccusage
-comparison. The `sdd-planner` definition changed from `model:
-inherit` to `model: opus` so that the top-tier fallback lands on the
-implementation tier rather than the session tier.
-
-One gap surfaced while deciding this: the person's walkthrough report
-at a phase pause ("this looks wrong") had no defined handling, which
-left the session improvising a diagnosis — a judgment the tiering is
-meant to keep off it, under any model. It got a path of its own:
-restate (session), diagnose in a dispatch (implementation tier, with
-a diagnosis mode added to the implementer definition), route the
-return (fix → sub-lettered task; options → decision review at the top
-tier; spec ambiguity → product question to the person). Defining the
-path was the fix regardless of tier; with it defined, the tier
-argument for the session is unchanged.
-
----
+Decided September 2026, after two measured specs on the top tier and
+none yet on the session tier. Cost side measured; quality side
+untested. The next spec's tier log is the first evidence either way.
 
 ## Tiering by role at execution time, not by a table written in advance
 

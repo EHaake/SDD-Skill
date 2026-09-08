@@ -63,6 +63,78 @@ person at phase boundaries and clearing its context there. The full table — ev
 runs, on which model, who's talking — is "The flow at a glance" in
 `SKILL.md`.
 
+## Model tiers, and why the orchestrator is the lowest one
+
+Three roles, three tiers. The names are the current models; the roles
+are what the skill actually fixes, and a project's `CLAUDE.md` names
+the models once.
+
+```mermaid
+flowchart LR
+    PERSON(("The person"))
+    subgraph top["Top tier — Fable, high: decides"]
+        SPEC["Spec conversation"]
+        PLAN["sdd-planner"]
+        SIGN["Sign-off review"]
+        DEC["Decision review"]
+    end
+    subgraph impl["Implementation tier — Opus, high: builds and checks"]
+        IMP["sdd-implementer"]
+        REV["Phase and per-task reviews, pre-merge sweep"]
+    end
+    subgraph sess["Session tier — Sonnet, medium: orchestrates"]
+        ORC["Orchestrating session"]
+    end
+    PERSON <-->|"own session, switched to Fable"| SPEC
+    ORC -->|"planning bundle, once per spec"| PLAN
+    ORC -->|"drafts"| SIGN
+    ORC -->|"decision bundle, non-routine task"| DEC
+    ORC -->|"task bundle, per task"| IMP
+    ORC -->|"diagnosis bundle, walkthrough finding"| IMP
+    ORC -->|"phase bundle"| REV
+    ORC -->|"pause report, plain language"| PERSON
+    PERSON -->|"walkthrough finding"| ORC
+```
+
+The placement follows one rule: **the expensive model goes where the
+decisions are concentrated, not where the turns are.** A Claude Code
+session re-sends its entire context on every turn, and on measured
+projects those re-sends were about 97% of all tokens. The
+orchestrating session is the longest-lived context in the workflow
+and takes the most turns, so whatever model sits there pays its rate
+on everything, constantly. The planner, the sign-off, and a decision
+review are the opposite shape: short-lived, dense with judgment. So
+the top tier runs inside those dispatches and nowhere else.
+
+That only works if the orchestrator genuinely has no judgment calls
+left. Every kind it could face has a defined route away from it:
+
+| The call | Where it goes |
+|---|---|
+| How to build the spec | `sdd-planner`, then sign-off — top tier |
+| A task that turns out not to be routine | Decision review — top tier; the session frames the question and transcribes the answer |
+| Is the work correct | The constitution's verification command, then the reviewer — implementation tier |
+| The person tried it and something is wrong | Diagnosis dispatch to the implementer; a fix comes back, or options go to a decision review |
+| What the product should do | The person, as a spec question, before any code changes |
+| Everything else — bundles, dispatch, verify, commit, report | The session |
+
+What remains for the session is procedure, whose mistakes are cheap
+and self-revealing (a bad bundle fails verification and costs one
+re-dispatch) and don't compound. That bounded cost is traded against
+a tier premium on every turn. Medium effort is the same reasoning
+applied to behavior: high effort makes a session investigate before
+acting, and everything a hands-off orchestrator reads inflates every
+later re-send.
+
+The session tier is also the one output a person reads — the pause
+report — which is why readability counts as a selection criterion for
+that seat and nowhere else. The skill pairs that with a plain-language
+rule for everything the person sees, under any model.
+
+The full decision record — what was measured, what was tried first,
+and what evidence would change each choice — is
+`references/design-record.md`.
+
 ## Installing
 
 Two separate installs, two separate places — updating this repo doesn't
