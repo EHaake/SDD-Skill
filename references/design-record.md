@@ -143,6 +143,33 @@ definition changed from `model: inherit` to `model: opus` at the same
 time, so that the top-tier fallback lands on the implementation tier
 rather than the session tier.
 
+### And then sideways: Opus 4.8, the person's choice
+
+Before any spec ran on Sonnet, the session moved again — to Opus 4.8,
+at the same medium effort. The deciding factor was the one the
+previous move had surfaced: the session seat is the only place whose
+prose the person reads, and of the available models Opus 4.8's
+reports read most clearly to them. The cost difference between
+Sonnet and Opus on the session's re-sends was judged not to matter on
+the person's plan (a Max 20x subscription), which removed the reason
+to prefer Sonnet; the allowance argument below is about the top
+tier's separate budget, not about Opus versus Sonnet.
+
+What survives from the Sonnet move is the structural part: the
+session still never resolves a design question (the decision-review
+route stays), still gets a plain-language rule for reports, and still
+runs at medium. What changed is the answer to "which model, given
+that it doesn't need to be the top tier" — and the record now treats
+that as a per-person choice rather than a cost-derived one. Sonnet
+stays on the list as the lever to pull if the session's share of the
+allowance ever becomes the constraint.
+
+Two settings details: a previous-generation model has no short alias
+in Claude Code's settings, so the template pins the full ID
+`claude-opus-4-8`, and the implementer and reviewer stay on `opus`,
+which resolves to the current generation — so the session and the
+implementation tier are different models at the same rate.
+
 ### The allowance argument
 
 The top tier's allowance is the scarcest budget in the workflow, and
@@ -175,18 +202,20 @@ small; the argument is behavioral, and plausible rather than measured.
    that missed a file the implementer needed, a review skipped, a
    stale `tasks.md` edit, an escape hatch taken on a task that was
    actually well-specified, a walkthrough finding diagnosed in place.
-   First fix: the session tier at **high** effort. One line in the
+   First fix: the session at **high** effort. One line in the
    project's `.claude/settings.json` (`effortLevel`), and in
    `assets/settings-template.json` if it should become the default.
-2. **Misses that persist at high effort** — then the implementation
-   tier as the session, for one spec of similar size, with the
-   `ccusage session --breakdown` comparison afterward. (Opus 4.8 was
-   the person's stated preference for readability if Opus is needed
-   in this seat at all.) Running the experiments in this order says
-   whether the problem was effort or tier, instead of guessing at
-   both.
-3. **The top tier as the session** only if both of the above fail.
-4. **A policy change that hands the session judgment calls again** —
+2. **Misses that persist at high effort** — then the current-generation
+   Opus as the session, for one spec of similar size, with the
+   `ccusage session --breakdown` comparison afterward. Running the
+   experiments in this order says whether the problem was effort or
+   model, instead of guessing at both.
+3. **The session's share of the allowance becoming the constraint** —
+   then Sonnet as the session, same measurement. This is the cost
+   lever, and it has not been exercised.
+4. **The top tier as the session** only if the misses persist through
+   all of the above.
+5. **A policy change that hands the session judgment calls again** —
    for example, if triage were ever widened so the session resolved
    design questions inline rather than sending them to a decision
    review. That would restore the "fewer mistakes" argument and the
@@ -197,8 +226,9 @@ Absent one of those, the choice stands.
 ### Status
 
 Decided September 2026, after two measured specs on the top tier and
-none yet on the session tier. Cost side measured; quality side
-untested. The next spec's tier log is the first evidence either way.
+none yet on any session tier below it. Cost side measured; quality
+side untested. The next spec's tier log is the first evidence either
+way.
 
 ## Tiering by role at execution time, not by a table written in advance
 

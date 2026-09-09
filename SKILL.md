@@ -248,9 +248,12 @@ model policy:
 - **The session tier orchestrates**, at medium effort. The
   orchestrating session takes many bookkeeping turns and re-sends its
   whole context on each, which makes it the dominant cost of the
-  workflow — and it makes no design decisions, so it runs below even
-  the implementation tier. Its one output a person reads is the pause
-  report, which is why it is also chosen for writing plainly.
+  workflow — and it makes no design decisions, so it never needs the
+  top tier. Which model sits there is otherwise the person's choice:
+  the pause report is the one output a person reads, so the model
+  whose prose they find clearest is the right one for this seat, and
+  a previous-generation model at the implementation tier's rate is a
+  perfectly good answer.
 
 The agent definitions carry `effort: high`, so reasoning stays
 full-strength inside them regardless of the session's setting.
@@ -309,9 +312,25 @@ How the loop runs, per task, in the orchestrating session:
 6. **Sequential, one task at a time, and drop the carried context at
    each phase boundary.** Commit-per-task and shared files make
    parallel implementers messy; parallel dispatch is a deliberate
-   opt-in for a later day, not the default. At a phase pause, `/clear`
-   and resume from the first unchecked task; compact only mid-phase if
-   the context grows large (see "Session and context hygiene").
+   opt-in for a later day, not the default. At a phase pause, the
+   report ends with the continuation prompt (below); the person
+   clears and pastes it. Compact only mid-phase if the context grows
+   large (see "Session and context hygiene").
+
+**Every pause that ends a session ends with a continuation prompt.**
+Whenever the next step belongs in a fresh context — a phase boundary,
+a spec approved and handed to planning, a spec merged with the next
+one waiting on `ROADMAP.md` — the report's last item is the exact
+prompt to paste into the next session, in its own fenced block so it
+copies in one click. It is self-contained: the spec directory, the
+files to read, where to resume (the first unchecked task, or the
+phase), the involvement level, the pause cadence, and any model switch
+the next session needs (a spec session opens on the session tier and
+must be switched to the top tier). Anything decided at the pause that
+the next session needs is written to a file first; the prompt points
+at files, it doesn't carry state. If nothing follows — the person has
+to decide something before work can continue — say so instead of
+inventing a next step.
 
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
@@ -349,8 +368,8 @@ reported, what was found, and what changed — or what still needs the
 person's decision.
 
 **A lighter implementer is available but off by default.** The
-dispatch can override the implementer's model per call — the session
-tier for a task that meets all three of: an existing automated check
+dispatch can override the implementer's model per call — a lighter
+model such as Sonnet for a task that meets all three of: an existing automated check
 as its Verify criterion (a manual-check task never drops tiers,
 because the orchestrator can't cheaply verify it), a named file in the
 codebase whose pattern it copies, and a small footprint. Leave it off
@@ -378,9 +397,9 @@ so they hold without anyone remembering. Two fallbacks: when the top
 tier's budget is exhausted, drop the override on the planner and
 sign-off dispatches for the rest of the window (both definitions
 default to the implementation tier) and log what ran; and if the
-session tier drops the protocol — a skipped review, a stale `tasks.md`
-edit, a task done by hand — the session moves to the implementation
-tier, one line in the settings file.
+session drops the protocol — a skipped review, a stale `tasks.md`
+edit, a task done by hand — raise its effort to high, one line in the
+settings file, before changing its model.
 
 **Spec conversations: chat at the project's start, Claude Code
 after.** The idea conversation, the constitution, and the first spec
@@ -393,23 +412,24 @@ session tier, so a spec session opens by stating which model it's
 running and, if that isn't the top tier, asks the person to pick the
 top tier for this session only. That is the single picker choice in
 the whole workflow; it's a choice about where the person's own
-thinking runs, which is why it's the one left to them.
+thinking runs, which is why it's the one left to them. When the spec
+is approved, the session ends with the continuation prompt that
+starts planning in a new session.
 
-**Why the session runs below the implementation tier, at medium
-effort.** "A stronger orchestrator makes fewer mistakes" is true
-wherever the orchestrator makes judgment calls, and the policy routes
-every judgment call elsewhere: design to the planner, the sign-off,
-and the decision review, correctness to the verification command and
-the reviewer, product questions to the person. What's left is
-procedure, whose errors are cheap and self-revealing and don't
-compound — traded against a tier premium on every turn of the
-longest-lived context in the workflow. Medium effort is the same
-reasoning applied to behavior: high effort makes a session investigate
-before acting, and everything a hands-off orchestrator reads inflates
-every later re-send. If a tier log shows procedural misses, the order
-of experiments is the session tier at high effort first, the
-implementation tier as the session second, the top tier last;
-`references/design-record.md` has the full case.
+**Why the session isn't the top tier, and runs at medium effort.**
+"A stronger orchestrator makes fewer mistakes" is true wherever the
+orchestrator makes judgment calls, and the policy routes every
+judgment call elsewhere: design to the planner, the sign-off, and the
+decision review, correctness to the verification command and the
+reviewer, product questions to the person. What's left is procedure,
+whose errors are cheap and self-revealing and don't compound — traded
+against a tier premium on every turn of the longest-lived context in
+the workflow. Medium effort is the same reasoning applied to behavior:
+high effort makes a session investigate before acting, and everything
+a hands-off orchestrator reads inflates every later re-send. If a
+tier log shows procedural misses, the order of experiments is the
+session at high effort first, a different session model second, the
+top tier last; `references/design-record.md` has the full case.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
@@ -423,7 +443,7 @@ every implementer dispatch — from reading the codebase at all.
 ## The flow at a glance: where each step runs, and on what
 
 Everything above, laid out as the sequence a spec actually follows.
-"Fable", "Opus", and "Sonnet" here stand for the top, implementation,
+"Fable", "Opus", and "Opus 4.8" here stand for the top, implementation,
 and session tiers named in the project's `CLAUDE.md` model policy; the
 roles are what's fixed, the names change as models do.
 
@@ -436,28 +456,28 @@ needs Claude Code until implementation:
 | Constitution → `CLAUDE.md` + `.claude/settings.json` | Chat, then committed | Fable | the person and Claude |
 | First spec → `spec.md` | Chat | Fable | the person and Claude |
 | First plan and tasks | Chat | Fable | Claude drafts; sign-off per involvement level |
-| Implementation | Claude Code | Sonnet session; Opus implementers | orchestrator |
+| Implementation | Claude Code | Opus 4.8 session; Opus implementers | orchestrator |
 
 **Every spec after that.** The project's `.claude/settings.json` opens
-every Claude Code session on Sonnet at medium effort; the agent
+every Claude Code session on Opus 4.8 at medium effort; the agent
 definitions and the orchestrator's overrides do the rest:
 
 | Step | Where | Model | Who's talking |
 |---|---|---|---|
-| Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Sonnet, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
-| Spec approved | **new session** — not `/clear`, which keeps the session's model | — | — |
-| Plan and tasks drafted | Claude Code, new session | Sonnet session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
+| Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Opus 4.8, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
+| Spec approved | **new session** — not `/clear`, which keeps the session's model; the spec session ends with the prompt to paste there | — | — |
+| Plan and tasks drafted | Claude Code, new session | Opus 4.8 session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
 | Sign-off | same session | `skeptical-reviewer` at **Fable, high**; one review, at most one re-review | orchestrator → reviewer |
-| Spec-conformance summary | same session | Sonnet | orchestrator → the person |
+| Spec-conformance summary | same session | Opus 4.8 | orchestrator → the person |
 | Non-routine task | same session | `skeptical-reviewer` at **Fable, high**, on a decision bundle; the session transcribes the recommendation | orchestrator → reviewer |
 | Implementation, per task | same session | `sdd-implementer` at **Opus, high**, on a task bundle | orchestrator → implementer |
 | Marked per-task review | same session | `skeptical-reviewer` at **Opus, high** | orchestrator → reviewer |
 | Phase review | same session | `skeptical-reviewer` at **Opus, high**, on a phase bundle | orchestrator → reviewer |
-| Phase pause report | same session | Sonnet | orchestrator → the person, who attests by using the app |
+| Phase pause report | same session | Opus 4.8 | orchestrator → the person, who attests by using the app; ends with the continuation prompt |
 | Walkthrough finding | same session | `sdd-implementer` at **Opus, high**, on a diagnosis bundle; a decision review at **Fable** if it returns options | the person → orchestrator → implementer |
-| Phase boundary | `/clear`, new session | Sonnet, medium | — |
+| Phase boundary | `/clear`, paste the continuation prompt | Opus 4.8, medium | — |
 | Pre-merge sweep | last phase's session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
-| Close-out and merge | same session | Sonnet | orchestrator |
+| Close-out and merge | same session | Opus 4.8 | orchestrator; ends with the prompt for the next spec session, if `ROADMAP.md` has one |
 
 **The one manual step** is the model switch at the top of each spec
 session. The session prompts for it; it can't be automated, because a
@@ -473,7 +493,7 @@ clear.
 **Fable's footprint per spec** is the spec conversation, one planner
 run, one sign-off (plus at most one re-review), and any decision
 reviews. Everything that edits code runs on Opus. Everything that has
-a turn count runs on Sonnet.
+a turn count runs on Opus 4.8.
 
 ## Principles worth generalizing
 
@@ -573,6 +593,9 @@ Cache re-sends of carried context are the cost — on measured sessions,
 - A spec conversation gets a session of its own and ends with a new
   session (not `/clear`, which keeps the model — see "The flow at a
   glance").
+- Every session-ending pause ends with a continuation prompt for the
+  next session, so clearing costs the person a paste, not a
+  reconstruction (see "Model tiering").
 - Batch bookkeeping into single shell commands. Each turn saved is a
   re-send of the whole context saved.
 - In a chat interface without a clear command, the equivalent move is

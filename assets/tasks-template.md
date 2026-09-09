@@ -107,6 +107,12 @@ is documented:
 4. **What needs your decision** — product questions only. Technical
    detail lives in plan.md and the commit log for anyone who wants it;
    it doesn't lead the report.
+5. **To continue** — when the next step belongs in a fresh session,
+   the exact prompt to paste after `/clear`, in its own fenced block:
+   spec directory, files to read, where to resume (the first
+   unchecked task, or the phase), involvement level, pause cadence,
+   and any model switch the next session needs. Omit it only when
+   nothing can proceed until item 4 is answered, and say so.
 
 What the person reports back from the walkthrough — "this looks
 wrong," "that didn't happen" — is a finding against an acceptance

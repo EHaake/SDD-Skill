@@ -1,8 +1,8 @@
 {
-  "model": "sonnet",
+  "model": "claude-opus-4-8",
   "effortLevel": "medium",
   "modelSettings": {
-    "claude-sonnet-5": { "effortLevel": "medium" },
+    "claude-opus-4-8": { "effortLevel": "medium" },
     "claude-opus-5": { "effortLevel": "medium" },
     "claude-fable-5-1": { "effortLevel": "high" }
   }

@@ -63,7 +63,7 @@ person at phase boundaries and clearing its context there. The full table — ev
 runs, on which model, who's talking — is "The flow at a glance" in
 `SKILL.md`.
 
-## Model tiers, and why the orchestrator is the lowest one
+## Model tiers, and why the orchestrator isn't the top one
 
 Three roles, three tiers. The names are the current models; the roles
 are what the skill actually fixes, and a project's `CLAUDE.md` names
@@ -82,7 +82,7 @@ flowchart LR
         IMP["sdd-implementer"]
         REV["Phase and per-task reviews, pre-merge sweep"]
     end
-    subgraph sess["Session tier — Sonnet, medium: orchestrates"]
+    subgraph sess["Session tier — Opus 4.8, medium: orchestrates"]
         ORC["Orchestrating session"]
     end
     PERSON <-->|"own session, switched to Fable"| SPEC
@@ -126,10 +126,16 @@ applied to behavior: high effort makes a session investigate before
 acting, and everything a hands-off orchestrator reads inflates every
 later re-send.
 
-The session tier is also the one output a person reads — the pause
-report — which is why readability counts as a selection criterion for
-that seat and nowhere else. The skill pairs that with a plain-language
-rule for everything the person sees, under any model.
+Which model fills the session seat is the person's choice, within
+one constraint: not the top tier. It's the one seat whose prose the
+person reads — the pause report — so readability counts there and
+nowhere else. The current pick is Opus 4.8, a previous-generation
+model at the implementation tier's rate, chosen because its reports
+read most clearly to the person running these projects. The skill
+pairs that with a plain-language rule for everything the person sees,
+under any model, and with a continuation prompt at every
+session-ending pause, so that clearing context costs a paste rather
+than a reconstruction.
 
 The full decision record — what was measured, what was tried first,
 and what evidence would change each choice — is

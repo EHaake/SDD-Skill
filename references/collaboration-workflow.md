@@ -288,6 +288,28 @@ where it has the least remaining value. `/clear` and resume from the
 first unchecked task in `tasks.md`; compact mid-phase only if the
 context grows large; never clear mid-task, which just buys a re-read.
 
+**End the pause with the prompt for the next session.** The person
+shouldn't have to reconstruct the handoff; the pause report's last
+item is the exact prompt to paste after `/clear`, in its own fenced
+block. It is self-contained and points at files rather than carrying
+state — anything decided at the pause goes into `tasks.md` or
+`plan.md` first:
+
+> Resume specs/005-export. Read CLAUDE.md and specs/005-export/
+> spec.md, plan.md, and tasks.md, then continue from the first
+> unchecked task (Phase 3). Involvement level: product owner.
+> Dispatch per the constitution's model policy; skeptical-reviewer
+> after the phase on a phase bundle; pause for me after Phase 3.
+
+The same rule applies at the other two session boundaries. A spec
+session ends with the prompt that starts planning ("Plan
+specs/005-export: assemble the planning bundle and dispatch
+sdd-planner per the model policy, then sign-off, then the
+spec-conformance summary"). A merge ends with the prompt for the next
+spec session, if `ROADMAP.md` has an obvious next item — including
+the reminder to switch that session to the top tier before starting.
+If the next step is the person's decision, say that instead.
+
 **Batch the bookkeeping.** After a task, the commit, the checkbox, and
 the tier-log row are one shell command, not three tool calls; bundle
 assembly and dispatch run back to back. The orchestrator re-sends its
