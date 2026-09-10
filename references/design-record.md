@@ -263,7 +263,7 @@ rule in `SKILL.md`'s loop:
 | Implementers and the orchestrator ingesting raw build and test logs | The constitution names one filtered verification command, run verbatim |
 | The orchestrator re-running every verification and reading every diff at the top tier | Verify by running the command, not by reading; open the diff only on failure |
 | A whole-codebase pre-merge sweep at the top tier | The sweep is bounded to documents plus the spec's diff, one tier down |
-| One orchestrator session accumulating the entire spec | Per-phase `/clear`; spec conversations in their own session |
+| One orchestrator session accumulating several specs' worth of context, spec conversations included | Spec conversations in their own session; per-phase `/clear` at first, later relaxed to two session boundaries per spec (see "Session boundaries" below) |
 | "Folded in by the orchestrator" and "seen by the orchestrator" recurring as tier-log entries — the orchestrating session doing work the tiering exists to move off it | The orchestrator does not implement second-look notes or do visual verification by hand |
 | The reviewer, at the top tier and reading the codebase fresh, costing about twice the implementation it reviewed | Reviewer defaults one tier down; every review scoped to a bundle |
 
@@ -274,6 +274,56 @@ overhead stays smaller than what it replaces. If a spec measured under
 all of the rules above still loses to the single-session regime on the
 top tier's budget, the implementer layer goes and the reviewer changes
 stay.
+
+## Session boundaries: two per spec, not one per phase
+
+The per-phase `/clear` came out of the measurement above: cache
+re-sends were 97% of tokens, so drop the carried context wherever it
+had the least remaining value, and a phase boundary looked like that
+place. In practice it produced a reset prompt at nearly every stage —
+after picking the next spec, after the spec conversation, after
+sign-off, after every phase — and the person found that too much.
+
+Their diagnosis of the measured sessions, on reflection: the re-send
+volume came from one orchestrator holding several specs' worth of
+context, spec conversations included, and from the orchestrator doing
+work itself at the top tier — not from one spec's phases accumulating
+in one session. Under the dispatch policy, the orchestrator's own
+context per spec is bookkeeping: bundles it wrote to files, short
+subagent returns, `tasks.md` edits, pause reports. The exploration,
+diffs, and logs that made the old sessions large now live in the
+subagents' contexts and are discarded with them. A per-phase clear
+was therefore buying a small reduction against a fixed cost: a
+re-read of the constitution and the three spec files on every resume,
+a paste by the person, and the loss of whatever the orchestrator had
+in mind between phases.
+
+The rule became two boundaries per spec, placed where the carried
+context is genuinely large and genuinely spent: after `plan.md` and
+`tasks.md` are final (the spec conversation is the biggest single
+context in the workflow, and the files now hold everything it
+decided), and after the merge (one spec's implementation has no value
+to the next spec's conversation). Both are new sessions rather than
+`/clear`, because the model changes at each: the spec session runs at
+the top tier, implementation at the session tier, and the next spec
+session has to open on the session tier to prompt for the switch.
+`/clear` left the workflow entirely; `/compact` remains for an
+implementation session that grows large.
+
+A consequence accepted knowingly: the spec session now also runs
+planning, so its few orchestrating turns — bundle assembly, two
+dispatches, the spec-conformance summary — run at the top tier, at
+high effort, over the spec conversation's context. That is a handful
+of turns against a whole session boundary saved, and it puts the
+planner's and reviewer's "needs the person" returns in front of the
+person who just wrote the spec, with the conversation still open.
+
+Decided September 2026, on the person's experience of the reset
+cadence rather than on a measurement. The next spec's `ccusage
+session --breakdown` is the check: if the implementation session's
+re-send volume grows to rival what the per-phase clears were saving,
+the phase boundary comes back as an optional clear at the person's
+call, not as the default.
 
 ## Review cadence: why per-phase everywhere
 

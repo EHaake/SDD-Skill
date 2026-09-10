@@ -151,14 +151,13 @@ conservatively.
 ## Drafting plan.md and tasks.md: the planner
 
 Once shipped code is what plans extend (see the skill's authorship
-section), the orchestrating session doesn't draft `plan.md` and
-`tasks.md` itself — it dispatches `sdd-planner`, once per spec, with a
-per-call override to the top tier named in `CLAUDE.md` (the session
-itself runs at the session tier). The exploration a plan needs is the
-expensive part of
-planning; it belongs in a discardable context bounded by a planning
-bundle, not in the session that then carries it through every
-sign-off round and into implementation:
+section), the session doesn't draft `plan.md` and `tasks.md` itself —
+the spec session dispatches `sdd-planner`, once per spec, with a
+per-call override to the top tier named in `CLAUDE.md` (explicit, so
+the dispatch lands there whether or not the person made the switch).
+The exploration a plan needs is the expensive part of planning; it
+belongs in a discardable context bounded by a planning bundle, not in
+the session that then carries it through every sign-off round:
 
 ```
 { echo "## Spec";                    cat specs/005-export/spec.md;
@@ -281,33 +280,35 @@ person, and a spec amendment before any code changes. The next pause
 report tells the person what was reported, what was found, and what
 changed, in their terms.
 
-**Clear at every phase boundary and at spec end.** Cache re-sends —
-context size times turn count — were 97% of all tokens on the measured
-sessions, so the carried context is the cost, and a phase boundary is
-where it has the least remaining value. `/clear` and resume from the
-first unchecked task in `tasks.md`; compact mid-phase only if the
-context grows large; never clear mid-task, which just buys a re-read.
+**One implementation session per spec; phase pauses stay in it.**
+Cache re-sends — context size times turn count — were 97% of all
+tokens on the measured sessions, but under the dispatch loop the
+session's own context is bookkeeping, not exploration, and a phase
+pause is where the person attests, not where the context has to go.
+The report goes to the person; they use the app and say continue; the
+same session goes on. `/compact` if the session has grown large;
+never clear or compact mid-task, which just buys a re-read. The
+session ends at the merge, and the next spec starts in a new one.
 
-**End the pause with the prompt for the next session.** The person
-shouldn't have to reconstruct the handoff; the pause report's last
-item is the exact prompt to paste after `/clear`, in its own fenced
-block. It is self-contained and points at files rather than carrying
-state — anything decided at the pause goes into `tasks.md` or
-`plan.md` first:
+**End a session-ending pause with the prompt for the next session.**
+The person shouldn't have to reconstruct the handoff; the report's
+last item is the exact prompt to paste into the new session, in its
+own fenced block. It is self-contained and points at files rather
+than carrying state — anything decided at the pause goes into
+`tasks.md` or `plan.md` first. The spec session ends this way when
+`plan.md` and `tasks.md` are final:
 
-> Resume specs/005-export. Read CLAUDE.md and specs/005-export/
-> spec.md, plan.md, and tasks.md, then continue from the first
-> unchecked task (Phase 3). Involvement level: product owner.
-> Dispatch per the constitution's model policy; skeptical-reviewer
-> after the phase on a phase bundle; pause for me after Phase 3.
+> Implement specs/005-export. Read CLAUDE.md and specs/005-export/
+> spec.md, plan.md, and tasks.md, then start from the first unchecked
+> task (Phase 1). Involvement level: product owner. Dispatch per the
+> constitution's model policy; skeptical-reviewer after each phase on
+> a phase bundle; pause for me after each phase.
 
-The same rule applies at the other two session boundaries. A spec
-session ends with the prompt that starts planning ("Plan
-specs/005-export: assemble the planning bundle and dispatch
-sdd-planner per the model policy, then sign-off, then the
-spec-conformance summary"). A merge ends with the prompt for the next
-spec session, if `ROADMAP.md` has an obvious next item — including
-the reminder to switch that session to the top tier before starting.
+A merge ends the same way, with the prompt for the next spec session
+if `ROADMAP.md` has an obvious next item — including the reminder to
+switch that session to the top tier before starting. A phase pause
+gets a prompt only when the person says they're stopping there; the
+resume form is the same, from the first unchecked task.
 If the next step is the person's decision, say that instead.
 
 **Batch the bookkeeping.** After a task, the commit, the checkbox, and

@@ -18,8 +18,8 @@ real interface between them.** Every decision that needs to survive past
 one conversation has to end up in a file, or it's gone the moment either
 session ends. This one fact drives almost everything else in this skill:
 which documents exist, why `plan.md` matters more over time than `spec.md`
-does, why context can be cleared aggressively without losing anything
-real, and why a project that documents its reasoning well is *easier* to
+does, why a session can end and a fresh one pick up without losing
+anything real, and why a project that documents its reasoning well is *easier* to
 resume cold than one that doesn't.
 
 ## The three-tool division of labor
@@ -309,18 +309,20 @@ How the loop runs, per task, in the orchestrating session:
    attestation at the phase pause. Every piece of work the
    orchestrator "folds in" itself is work the tiering exists to move
    off it.
-6. **Sequential, one task at a time, and drop the carried context at
-   each phase boundary.** Commit-per-task and shared files make
-   parallel implementers messy; parallel dispatch is a deliberate
-   opt-in for a later day, not the default. At a phase pause, the
-   report ends with the continuation prompt (below); the person
-   clears and pastes it. Compact only mid-phase if the context grows
-   large (see "Session and context hygiene").
+6. **Sequential, one task at a time, in one session for the whole
+   spec.** Commit-per-task and shared files make parallel implementers
+   messy; parallel dispatch is a deliberate opt-in for a later day, not
+   the default. A phase pause is a pause, not a session boundary: the
+   report goes to the person, they attest by using the app, and the
+   same session continues when they say so. Compact if the context
+   grows large; the session ends at the merge (see "Session and
+   context hygiene").
 
 **Every pause that ends a session ends with a continuation prompt.**
-Whenever the next step belongs in a fresh context — a phase boundary,
-a spec approved and handed to planning, a spec merged with the next
-one waiting on `ROADMAP.md` — the report's last item is the exact
+A spec has two session boundaries — `plan.md` and `tasks.md` final,
+handed to implementation; the spec merged, with the next one waiting
+on `ROADMAP.md` — plus any pause the person turns into one by saying
+they're stopping. At each, the report's last item is the exact
 prompt to paste into the next session, in its own fenced block so it
 copies in one click. It is self-contained: the spec directory, the
 files to read, where to resume (the first unchecked task, or the
@@ -328,9 +330,10 @@ phase), the involvement level, the pause cadence, and any model switch
 the next session needs (a spec session opens on the session tier and
 must be switched to the top tier). Anything decided at the pause that
 the next session needs is written to a file first; the prompt points
-at files, it doesn't carry state. If nothing follows — the person has
-to decide something before work can continue — say so instead of
-inventing a next step.
+at files, it doesn't carry state. A phase pause that isn't ending the
+session gets no prompt — just what the person should check and how to
+say continue. If nothing follows — the person has to decide something
+before work can continue — say so instead of inventing a next step.
 
 **The escape hatch.** If the implementer fails verification twice on
 the same task, or returns "stopped on a judgment call" for something
@@ -405,16 +408,21 @@ settings file, before changing its model.
 after.** The idea conversation, the constitution, and the first spec
 happen in chat — there is no codebase yet, and chat is the top tier at
 the person's own setting. Every later spec conversation happens in
-Claude Code, in a session of its own — never inside an orchestrating
-session, whose context is the cost the tiering exists to contain. A
-session has one model, set at start, and the project default is the
-session tier, so a spec session opens by stating which model it's
-running and, if that isn't the top tier, asks the person to pick the
-top tier for this session only. That is the single picker choice in
-the whole workflow; it's a choice about where the person's own
-thinking runs, which is why it's the one left to them. When the spec
-is approved, the session ends with the continuation prompt that
-starts planning in a new session.
+Claude Code, in a spec session of its own — never inside the
+implementation session, whose context is the cost the tiering exists
+to contain. A session has one model, set at start, and the project
+default is the session tier, so a spec session opens by stating which
+model it's running and, if that isn't the top tier, asks the person to
+pick the top tier for this session only. That is the single picker
+choice in the whole workflow; it's a choice about where the person's
+own thinking runs, which is why it's the one left to them. The spec
+session also runs planning: once `spec.md` is approved it assembles
+the planning bundle, dispatches the `sdd-planner`, then the sign-off,
+then writes the spec-conformance summary — everything the top tier
+does for a spec, with the person who just wrote the spec still there
+for any product question the planner or reviewer returns. When
+`plan.md` and `tasks.md` are final, the session ends with the
+continuation prompt that starts implementation in a new session.
 
 **Why the session isn't the top tier, and runs at medium effort.**
 "A stronger orchestrator makes fewer mistakes" is true wherever the
@@ -464,35 +472,35 @@ definitions and the orchestrator's overrides do the rest:
 
 | Step | Where | Model | Who's talking |
 |---|---|---|---|
-| Spec conversation → `spec.md` | Claude Code, **a session of its own** | Fable — the session opens on Opus 4.8, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
-| Spec approved | **new session** — not `/clear`, which keeps the session's model; the spec session ends with the prompt to paste there | — | — |
-| Plan and tasks drafted | Claude Code, new session | Opus 4.8 session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
+| Spec conversation → `spec.md` | Claude Code, **the spec session** | Fable — the session opens on Opus 4.8, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
+| Plan and tasks drafted | same session | the spec session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
 | Sign-off | same session | `skeptical-reviewer` at **Fable, high**; one review, at most one re-review | orchestrator → reviewer |
-| Spec-conformance summary | same session | Opus 4.8 | orchestrator → the person |
-| Non-routine task | same session | `skeptical-reviewer` at **Fable, high**, on a decision bundle; the session transcribes the recommendation | orchestrator → reviewer |
+| Spec-conformance summary | same session | Fable | orchestrator → the person |
+| Plan and tasks final | **new session** — the spec session ends with the prompt to paste there; the new session opens on Opus 4.8 from settings | — | — |
+| Non-routine task | the implementation session | `skeptical-reviewer` at **Fable, high**, on a decision bundle; the session transcribes the recommendation | orchestrator → reviewer |
 | Implementation, per task | same session | `sdd-implementer` at **Opus, high**, on a task bundle | orchestrator → implementer |
 | Marked per-task review | same session | `skeptical-reviewer` at **Opus, high** | orchestrator → reviewer |
 | Phase review | same session | `skeptical-reviewer` at **Opus, high**, on a phase bundle | orchestrator → reviewer |
-| Phase pause report | same session | Opus 4.8 | orchestrator → the person, who attests by using the app; ends with the continuation prompt |
+| Phase pause report | same session | Opus 4.8 | orchestrator → the person, who attests by using the app and says continue; the session stays open |
 | Walkthrough finding | same session | `sdd-implementer` at **Opus, high**, on a diagnosis bundle; a decision review at **Fable** if it returns options | the person → orchestrator → implementer |
-| Phase boundary | `/clear`, paste the continuation prompt | Opus 4.8, medium | — |
-| Pre-merge sweep | last phase's session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
+| Pre-merge sweep | same session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
 | Close-out and merge | same session | Opus 4.8 | orchestrator; ends with the prompt for the next spec session, if `ROADMAP.md` has one |
+| Spec merged | **new session** for the next spec, which opens on Opus 4.8 and asks for the switch to Fable | — | — |
 
 **The one manual step** is the model switch at the top of each spec
 session. The session prompts for it; it can't be automated, because a
 session has exactly one model and the project default is the session
 tier. Everything else resolves from `.claude/settings.json`, the agent
-frontmatter, and the orchestrator's overrides. Note the asymmetry:
-`/clear` resets context but keeps the session's model, which is right
-at a phase boundary (the session is already on the session tier) and
-wrong after a spec session (it would leave planning and orchestration
-on the top tier) — so a spec session ends with a new session, not a
-clear.
+frontmatter, and the orchestrator's overrides. Both session boundaries
+are new sessions, not `/clear`: `/clear` resets context but keeps the
+session's model, which would leave implementation on the top tier
+after the spec session, and would skip the next spec session's opening
+prompt for the switch. `/clear` has no place in the workflow;
+`/compact` is the tool for an implementation session that grows long.
 
-**Fable's footprint per spec** is the spec conversation, one planner
-run, one sign-off (plus at most one re-review), and any decision
-reviews. Everything that edits code runs on Opus. Everything that has
+**Fable's footprint per spec** is the spec session (the conversation
+and the handful of turns that dispatch planning), one planner run,
+one sign-off (plus at most one re-review), and any decision reviews. Everything that edits code runs on Opus. Everything that has
 a turn count runs on Opus 4.8.
 
 ## Principles worth generalizing
@@ -583,18 +591,28 @@ writer, and it needs different handling:
 
 Cache re-sends of carried context are the cost — on measured sessions,
 97% of all tokens — so context size and turn count are the levers.
+Under the dispatch policy the orchestrator's own context is small: the
+exploration, diffs, and logs live in the subagents' contexts, and what
+the session carries is bundles it wrote to files, short returns, and
+bookkeeping. What makes a session large is holding work that belongs
+to a different stage, so that is where the boundaries go.
 
-- In Claude Code, `/clear` at every phase boundary and at spec end —
-  not `/compact` — because a project with real documentation
-  discipline loses almost nothing when the conversation resets:
-  `CLAUDE.md` re-reads automatically, and `tasks.md` is exactly the
-  file designed to answer "where was I" cold. `/compact` is for staying
-  mid-phase when the context has grown large; never clear mid-task.
-- A spec conversation gets a session of its own and ends with a new
-  session (not `/clear`, which keeps the model — see "The flow at a
-  glance").
+- **Two session boundaries per spec, both new sessions.** The spec
+  session ends when `plan.md` and `tasks.md` are final — the spec
+  conversation is the largest single context in the workflow and has
+  no further value once the files hold it. The implementation session
+  ends at the merge — one spec's implementation never carries into
+  the next spec's conversation. A project with real documentation
+  discipline loses nothing at either boundary: `CLAUDE.md` re-reads
+  automatically, and `tasks.md` is exactly the file designed to answer
+  "where was I" cold.
+- **Phase pauses stay in the session.** The person attests and says
+  continue. `/compact` if the implementation session has grown large;
+  never clear or compact mid-task. If the person is stopping at a
+  phase pause, that pause becomes a session-ending one and gets the
+  continuation prompt like any other.
 - Every session-ending pause ends with a continuation prompt for the
-  next session, so clearing costs the person a paste, not a
+  next session, so a new session costs the person a paste, not a
   reconstruction (see "Model tiering").
 - Batch bookkeeping into single shell commands. Each turn saved is a
   re-send of the whole context saved.
@@ -703,7 +721,7 @@ context.
 **Once shipped code is what plans extend, plan in Claude Code.** A plan
 against a real codebase needs the actual model definitions, the actual
 view structure, the actual dependency-injection shape — ground truth
-chat can't see. Once `spec.md` is approved, the orchestrating session
+chat can't see. Once `spec.md` is approved, the spec session
 assembles a planning bundle with shell — the spec, the previous spec's
 `plan.md` and `tasks.md` as the pattern, a file listing — and
 dispatches the `sdd-planner` subagent (`assets/sdd-planner.md`) on it,
@@ -713,7 +731,7 @@ usage for the tier log. The orchestrator commits the drafts to the spec
 branch with the PR still in draft, and the skeptical-reviewer signs
 off. The exploration a plan needs is the expensive part of planning,
 and this puts it in a discardable context, bounded by the bundle,
-instead of in the session that then carries it into implementation.
+instead of in the spec session's own context.
 
 **`spec.md` stays a conversation with the person in both phases** —
 in chat for the first spec, in a dedicated Claude Code spec session

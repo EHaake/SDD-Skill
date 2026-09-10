@@ -54,12 +54,13 @@ spec, plan, and tasks — nothing has a codebase yet. From then on,
 Claude Code sessions in the project open on the session tier at
 medium effort, automatically. Each later spec is a conversation in a
 Claude Code session of its own, switched to the top tier by the person
-(the only manual model choice in the workflow); once approved, an
-orchestrating session dispatches the planner and the sign-off at the
-top tier, then implements task by task through implementation-tier
-implementers and per-phase reviews, sending any real design question
-back up to the top tier rather than deciding it, pausing for the
-person at phase boundaries and clearing its context there. The full table — every step, where it
+(the only manual model choice in the workflow); once approved, that
+same session dispatches the planner and the sign-off at the top tier,
+then hands off to an implementation session on the session tier that
+builds task by task through implementation-tier implementers and
+per-phase reviews, sending any real design question back up to the
+top tier rather than deciding it, pausing for the person after each
+phase, and ending at the merge. Two session boundaries per spec. The full table — every step, where it
 runs, on which model, who's talking — is "The flow at a glance" in
 `SKILL.md`.
 
@@ -134,7 +135,7 @@ model at the implementation tier's rate, chosen because its reports
 read most clearly to the person running these projects. The skill
 pairs that with a plain-language rule for everything the person sees,
 under any model, and with a continuation prompt at every
-session-ending pause, so that clearing context costs a paste rather
+session-ending pause, so that each session boundary costs a paste rather
 than a reconstruction.
 
 The full decision record — what was measured, what was tried first,

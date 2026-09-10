@@ -131,15 +131,17 @@ names as models change; the roles don't. -->
   per-call override to the top tier's name. The three agent
   definitions carry `effort: high`, which overrides the session's
   medium, so reasoning stays at full strength where it matters.
-- **Spec conversations happen in a Claude Code session of their own**,
-  at the top tier, and end with a new session (not `/clear`, which
-  keeps the model) when the spec is approved — never inside an
-  orchestrating session. The spec session's last message is the
-  continuation prompt that starts planning in the new session. A session in this repo opens at the session
-  tier, so a spec session states its model first and, if it isn't the
-  top tier, asks the person to switch to the top tier for this
-  session — the model selector in the app, or `/model fable` — before
-  continuing. `.claude/settings.json` pins effort per model, so
+- **Spec conversations happen in a Claude Code spec session of their
+  own**, at the top tier, never inside an implementation session. The
+  spec session also runs planning once `spec.md` is approved — the
+  planner dispatch, the sign-off, the spec-conformance summary — and
+  ends when `plan.md` and `tasks.md` are final, with a new session
+  (not `/clear`, which keeps the model) whose opening prompt is the
+  spec session's last message. A session in this repo opens at the
+  session tier, so a spec session states its model first and, if it
+  isn't the top tier, asks the person to switch to the top tier for
+  this session — the model selector in the app, or `/model fable` —
+  before continuing. `.claude/settings.json` pins effort per model, so
   picking the top tier brings high effort with it and the next session
   still opens at the session tier. (The project's very first spec,
   with no codebase yet, happened in chat.)
@@ -167,16 +169,17 @@ names as models change; the roles don't. -->
   orchestrator edits `tasks.md` or commits, and the orchestrator never
   implements second-look notes or does device or browser checks by
   hand.
-- **Clear at every phase boundary and at spec end** (`/clear`, resuming
-  from the first unchecked task). Cache re-sends are context size times
-  turn count; a phase boundary is where the carried context has the
-  least remaining value. Compact mid-phase only if the context grows
-  large; never clear mid-task.
+- **One implementation session per spec.** It opens when `plan.md` and
+  `tasks.md` are final and ends at the merge; a phase pause is a pause
+  in it, not a boundary — the person attests and says continue.
+  `/compact` if the context grows large; never clear or compact
+  mid-task. `/clear` is not part of the workflow: both session
+  boundaries are new sessions.
 - **Every session-ending pause ends with a continuation prompt.** When
-  the next step belongs in a fresh session — after a phase pause,
-  after a spec is approved, after a merge with the next spec waiting
-  on `ROADMAP.md` — the report's last item is the exact prompt to
-  paste there, in its own fenced block. It names the spec directory,
+  the next step belongs in a fresh session — plan and tasks final, a
+  merge with the next spec waiting on `ROADMAP.md`, or a phase pause
+  the person is stopping at — the report's last item is the exact
+  prompt to paste there, in its own fenced block. It names the spec directory,
   the files to read, where to resume, the involvement level, the
   pause cadence, and any model switch the next session needs. Write
   anything the next session needs to a file first; the prompt points
