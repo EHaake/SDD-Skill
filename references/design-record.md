@@ -179,6 +179,9 @@ sign-off, decision reviews, and the spec conversation — all short —
 the fallback is a one-line change (drop the override on the
 dispatches; both agent definitions default to the implementation
 tier), not a mid-spec model switch in a long-running session.
+Experiment 1 (below) puts the session on the top tier's model and so
+accepts exactly that switch as its fallback; needing it is one of
+the experiment's results.
 
 ### Why medium rather than high
 
@@ -228,7 +231,107 @@ Absent one of those, the choice stands.
 Decided September 2026, after two measured specs on the top tier and
 none yet on any session tier below it. Cost side measured; quality
 side untested. The next spec's tier log is the first evidence either
-way.
+way. Superseded for one spec by experiment 1, below, which tests a
+cost premise this section took for granted.
+
+### Experiment 1: the session on the top tier's model, at medium
+
+**The premise that changed.** Everything above prices the session
+seat as "the model's rate times every re-send", as if a tier's rate
+were one number. It isn't. Re-sends bill at the cache-read rate, and
+Fable 5.1 cut that rate to a quarter of Fable 5's. Per million
+tokens:
+
+| Model | Input | Output | Cache read | Cache write (5-min) |
+|---|---|---|---|---|
+| Fable 5.1 | $10 | $50 | $0.25 | $12.50 |
+| Fable 5 | $10 | $50 | $1.00 | $12.50 |
+| Opus 5 / Opus 4.8 | $5 | $25 | $0.50 | $6.25 |
+| Sonnet 5 | $2 | $10 | $0.20 | $2.50 |
+
+At the traffic mix this record measured — cache reads about 97% of
+tokens — the two seats cost about the same per million tokens sent:
+
+| Mix (read / write / output) | Opus 4.8 | Fable 5.1 |
+|---|---|---|
+| 97% / 2% / 1% | $86 | $99 |
+| 98% / 1.5% / 0.5% | $70 | $68 |
+
+So "a tier premium on every turn" is no longer true of the top
+tier's model on the traffic that dominates. The record above does not
+say which Fable the 82%-of-allowance figure was measured on, or what
+cache-read rate it assumed; if it was Fable 5, that seat's re-sends
+cost four times what they would today. Public write-ups of Fable 5.1
+workflows (September 2026) reach the same arithmetic — per token,
+back to what Opus alone cost — and run Fable 5.1 as the orchestrator
+with the same context discipline this skill already has: bundles,
+short returns, scratch files, handoff documents.
+
+**What stays fixed.** One variable changes. The routes away from the
+session stay exactly as drawn above — the session still frames a
+decision bundle rather than deciding, still never diagnoses in place
+— even though a top-tier session could plausibly take those calls
+back. Simplifying the routes is a later experiment, once this one has
+a number. The planner stays a dispatch regardless of outcome; its
+reason is context, not tier. Medium effort stays for the behavioral
+reason above.
+
+**Hypotheses.** (1) Dollar cost per spec, from `ccusage session
+--breakdown`, lands within about 15% of the same spec on Opus 4.8.
+(2) The draw on Fable's separate allowance over one spec is small
+enough that the allowance is not the constraint — the number to
+watch, since the allowance's weighting of cache reads is not
+published and could not be verified. (3) The pause reports read at
+least as clearly as Opus 4.8's did, by the person's judgment.
+(4) The tier log shows no more procedural misses than before.
+
+**Protocol.** One spec, on a project whose previous spec ran under
+the current loop rules.
+
+1. Before the spec session opens, the person notes the Fable
+   allowance reading from the usage page. The tier log gets a header
+   row: experiment 1, session `claude-fable-5-1` at medium, the date,
+   the allowance at start.
+2. The spec runs exactly as `SKILL.md` on this branch says. Every
+   dispatch logs its resolved model as usual. If the allowance runs
+   out and the session falls back to `claude-opus-4-8`, the tier log
+   records the turn it happened at; that is a result, not a failure.
+3. At the merge, the person notes the allowance reading again, runs
+   `ccusage session --breakdown`, and writes both into the tier log
+   with a one-line verdict on how the pause reports read.
+4. Compare against the most recent spec of similar size on `main`.
+   If none has yet run on Opus 4.8 under the same loop rules, the
+   next spec on `main` is the control, and the comparison waits for
+   it.
+
+**Decision rule.** All four hold: merge the branch; the session tier
+becomes Fable 5.1 at medium, and the next experiment tests the
+implementer on Fable 5.1 at medium against Opus at high, judged per
+completed task including review rounds. The allowance is the
+constraint: keep `main`, and record the allowance draw per spec so
+the weighting is known. Reports read worse: the session tier is the
+person's choice of prose, and the record above already says so —
+keep `main`, note the finding. Procedural misses rise: unexpected
+under a stronger model; investigate before concluding anything.
+
+**Applying it to a project.** The session that opens a project for
+this experiment is given the prompt below; it updates the two files
+the model policy lives in and starts the log. Paste it into a fresh
+session in the project, with this branch installed as the skill.
+
+> Experiment 1 setup for this project. Rewrite `.claude/settings.json`
+> from the installed skill's `assets/settings-template.json`
+> (session model `claude-fable-5-1` at medium effort). In `CLAUDE.md`,
+> replace the "Model policy" section with the one in the installed
+> skill's `assets/CLAUDE-template.md`, keeping this project's
+> involvement level and anything project-specific the old section
+> carried. Add a header row to the current spec's tier log in
+> `tasks.md` (or the next spec's, if none is open): experiment 1,
+> session `claude-fable-5-1` at medium, today's date, and the Fable
+> allowance reading I give you. Commit the three files in one commit
+> with a message that says which experiment and which branch of the
+> skill this project now follows. Then stop and show me `/effort
+> status`; don't start any spec work in this session.
 
 ## Tiering by role at execution time, not by a table written in advance
 

@@ -231,8 +231,9 @@ whole-codebase read; see "Keeping reviews cheap" in
 
 ## Model tiering: three roles, three tiers
 
-Three roles, each on its own tier, named once in the constitution's
-model policy:
+Three roles, three tiers, named once in the constitution's model
+policy. On this branch — experiment 1, see `references/design-record.md`
+— the top and session tiers are the same model at different effort:
 
 - **The top tier decides.** The spec conversation, plan and task
   drafting (the `sdd-planner`, one dispatch per spec), and the
@@ -248,12 +249,14 @@ model policy:
 - **The session tier orchestrates**, at medium effort. The
   orchestrating session takes many bookkeeping turns and re-sends its
   whole context on each, which makes it the dominant cost of the
-  workflow — and it makes no design decisions, so it never needs the
-  top tier. Which model sits there is otherwise the person's choice:
-  the pause report is the one output a person reads, so the model
-  whose prose they find clearest is the right one for this seat, and
-  a previous-generation model at the implementation tier's rate is a
-  perfectly good answer.
+  workflow — and it makes no design decisions, so nothing about the
+  role needs the top tier. What decides which model sits there is the
+  price of a cache read, since re-sends are almost all of the seat's
+  tokens, and the prose of the pause report, the one output a person
+  reads. Under experiment 1 the seat runs Fable 5.1 at medium: its
+  cache reads bill at half the implementation tier's rate, so the
+  per-token cost is about a wash and the open questions are the draw
+  on Fable's separate allowance and how its reports read.
 
 The agent definitions carry `effort: high`, so reasoning stays
 full-strength inside them regardless of the session's setting.
@@ -326,9 +329,9 @@ they're stopping. At each, the report's last item is the exact
 prompt to paste into the next session, in its own fenced block so it
 copies in one click. It is self-contained: the spec directory, the
 files to read, where to resume (the first unchecked task, or the
-phase), the involvement level, the pause cadence, and any model switch
-the next session needs (a spec session opens on the session tier and
-must be switched to the top tier). Anything decided at the pause that
+phase), the involvement level, the pause cadence, and any effort
+switch the next session needs (a spec session opens at medium and
+must be raised to high). Anything decided at the pause that
 the next session needs is written to a file first; the prompt points
 at files, it doesn't carry state. A phase pause that isn't ending the
 session gets no prompt — just what the person should check and how to
@@ -399,10 +402,14 @@ missing — project settings outrank the app's picker for new sessions,
 so they hold without anyone remembering. Two fallbacks: when the top
 tier's budget is exhausted, drop the override on the planner and
 sign-off dispatches for the rest of the window (both definitions
-default to the implementation tier) and log what ran; and if the
-session drops the protocol — a skipped review, a stale `tasks.md`
-edit, a task done by hand — raise its effort to high, one line in the
-settings file, before changing its model.
+default to the implementation tier), switch the session itself to the
+implementation tier's previous generation (`/model claude-opus-4-8`,
+mid-session — one cache re-write, then business as usual) and log
+both in the tier log, since under experiment 1 the session shares
+that budget; and if the session drops the protocol — a skipped
+review, a stale `tasks.md` edit, a task done by hand — raise its
+effort to high, one line in the settings file, before changing its
+model.
 
 **Spec conversations: chat at the project's start, Claude Code
 after.** The idea conversation, the constitution, and the first spec
@@ -410,13 +417,14 @@ happen in chat — there is no codebase yet, and chat is the top tier at
 the person's own setting. Every later spec conversation happens in
 Claude Code, in a spec session of its own — never inside the
 implementation session, whose context is the cost the tiering exists
-to contain. A session has one model, set at start, and the project
-default is the session tier, so a spec session opens by stating which
-model it's running and, if that isn't the top tier, asks the person to
-pick the top tier for this session only. That is the single picker
-choice in the whole workflow; it's a choice about where the person's
-own thinking runs, which is why it's the one left to them. The spec
-session also runs planning: once `spec.md` is approved it assembles
+to contain. A session opens at the settings default — under
+experiment 1, the top tier's model at medium effort — so a spec
+session opens by stating its model and effort (`/effort status` is
+the authoritative check) and asks the person to raise effort to high
+for this session only (`/effort high`). That is the single manual
+choice in the whole workflow; it's a choice about how hard the
+person's own thinking seat reasons, which is why it's the one left to
+them. The spec session also runs planning: once `spec.md` is approved it assembles
 the planning bundle, dispatches the `sdd-planner`, then the sign-off,
 then writes the spec-conformance summary — everything the top tier
 does for a spec, with the person who just wrote the spec still there
@@ -424,20 +432,25 @@ for any product question the planner or reviewer returns. When
 `plan.md` and `tasks.md` are final, the session ends with the
 continuation prompt that starts implementation in a new session.
 
-**Why the session isn't the top tier, and runs at medium effort.**
-"A stronger orchestrator makes fewer mistakes" is true wherever the
-orchestrator makes judgment calls, and the policy routes every
-judgment call elsewhere: design to the planner, the sign-off, and the
-decision review, correctness to the verification command and the
-reviewer, product questions to the person. What's left is procedure,
-whose errors are cheap and self-revealing and don't compound — traded
-against a tier premium on every turn of the longest-lived context in
-the workflow. Medium effort is the same reasoning applied to behavior:
-high effort makes a session investigate before acting, and everything
-a hands-off orchestrator reads inflates every later re-send. If a
-tier log shows procedural misses, the order of experiments is the
-session at high effort first, a different session model second, the
-top tier last; `references/design-record.md` has the full case.
+**Why the session runs on the top tier's model, at medium effort —
+experiment 1.** The routing above is unchanged: the policy still
+sends every judgment call away from the session — design to the
+planner, the sign-off, and the decision review, correctness to the
+verification command and the reviewer, product questions to the
+person — and what's left is procedure. The session used to sit one
+tier down because the top tier was assumed to charge a premium on
+every re-send of the longest-lived context. Fable 5.1 broke that
+assumption: its cache reads bill at $0.25 per million tokens, half
+the Opus rate, and re-sends are about 97% of the seat's tokens, so
+the per-token cost of the two seats is about equal. This branch runs
+one spec with the session on Fable 5.1 at medium and nothing else
+changed, to measure the two things price doesn't settle: the draw on
+Fable's separate allowance, and whether its pause reports read well.
+Medium effort stays for the same behavioral reason as before: high
+effort makes a session investigate before acting, and everything a
+hands-off orchestrator reads inflates every later re-send.
+`references/design-record.md` has the premise, the protocol, and the
+decision rule.
 
 The policy is written into each project's `CLAUDE.md` (see the
 constitution template's "Model policy" section), next to the
@@ -451,9 +464,10 @@ every implementer dispatch — from reading the codebase at all.
 ## The flow at a glance: where each step runs, and on what
 
 Everything above, laid out as the sequence a spec actually follows.
-"Fable", "Opus", and "Opus 4.8" here stand for the top, implementation,
-and session tiers named in the project's `CLAUDE.md` model policy; the
-roles are what's fixed, the names change as models do.
+"Fable" and "Opus" here stand for the tiers named in the project's
+`CLAUDE.md` model policy — under experiment 1 the session tier is
+Fable at medium and the top tier is Fable at high; the roles are
+what's fixed, the names change as models do.
 
 **A brand-new project, once.** Nothing has a codebase yet, so nothing
 needs Claude Code until implementation:
@@ -464,44 +478,48 @@ needs Claude Code until implementation:
 | Constitution → `CLAUDE.md` + `.claude/settings.json` | Chat, then committed | Fable | the person and Claude |
 | First spec → `spec.md` | Chat | Fable | the person and Claude |
 | First plan and tasks | Chat | Fable | Claude drafts; sign-off per involvement level |
-| Implementation | Claude Code | Opus 4.8 session; Opus implementers | orchestrator |
+| Implementation | Claude Code | Fable session at medium; Opus implementers | orchestrator |
 
 **Every spec after that.** The project's `.claude/settings.json` opens
-every Claude Code session on Opus 4.8 at medium effort; the agent
+every Claude Code session on Fable 5.1 at medium effort; the agent
 definitions and the orchestrator's overrides do the rest:
 
 | Step | Where | Model | Who's talking |
 |---|---|---|---|
-| Spec conversation → `spec.md` | Claude Code, **the spec session** | Fable — the session opens on Opus 4.8, says so, and the person switches to Fable for this session (the model selector, or `/model fable`); effort follows the model from settings | the person and Claude |
+| Spec conversation → `spec.md` | Claude Code, **the spec session** | Fable, high — the session opens at medium, says so, and the person raises effort for this session (`/effort high`) | the person and Claude |
 | Plan and tasks drafted | same session | the spec session dispatches `sdd-planner` at **Fable, high** | orchestrator → planner |
 | Sign-off | same session | `skeptical-reviewer` at **Fable, high**; one review, at most one re-review | orchestrator → reviewer |
 | Spec-conformance summary | same session | Fable | orchestrator → the person |
-| Plan and tasks final | **new session** — the spec session ends with the prompt to paste there; the new session opens on Opus 4.8 from settings | — | — |
+| Plan and tasks final | **new session** — the spec session ends with the prompt to paste there; the new session opens at medium from settings | — | — |
 | Non-routine task | the implementation session | `skeptical-reviewer` at **Fable, high**, on a decision bundle; the session transcribes the recommendation | orchestrator → reviewer |
 | Implementation, per task | same session | `sdd-implementer` at **Opus, high**, on a task bundle | orchestrator → implementer |
 | Marked per-task review | same session | `skeptical-reviewer` at **Opus, high** | orchestrator → reviewer |
 | Phase review | same session | `skeptical-reviewer` at **Opus, high**, on a phase bundle | orchestrator → reviewer |
-| Phase pause report | same session | Opus 4.8 | orchestrator → the person, who attests by using the app and says continue; the session stays open |
+| Phase pause report | same session | Fable, medium | orchestrator → the person, who attests by using the app and says continue; the session stays open |
 | Walkthrough finding | same session | `sdd-implementer` at **Opus, high**, on a diagnosis bundle; a decision review at **Fable** if it returns options | the person → orchestrator → implementer |
 | Pre-merge sweep | same session | `skeptical-reviewer` at **Opus, high**, documents + spec diff | orchestrator → reviewer |
-| Close-out and merge | same session | Opus 4.8 | orchestrator; ends with the prompt for the next spec session, if `ROADMAP.md` has one |
-| Spec merged | **new session** for the next spec, which opens on Opus 4.8 and asks for the switch to Fable | — | — |
+| Close-out and merge | same session | Fable, medium | orchestrator; ends with the prompt for the next spec session, if `ROADMAP.md` has one |
+| Spec merged | **new session** for the next spec, which opens at medium and asks for high effort | — | — |
 
-**The one manual step** is the model switch at the top of each spec
-session. The session prompts for it; it can't be automated, because a
-session has exactly one model and the project default is the session
-tier. Everything else resolves from `.claude/settings.json`, the agent
-frontmatter, and the orchestrator's overrides. Both session boundaries
-are new sessions, not `/clear`: `/clear` resets context but keeps the
-session's model, which would leave implementation on the top tier
-after the spec session, and would skip the next spec session's opening
-prompt for the switch. `/clear` has no place in the workflow;
+**The one manual step** is the effort switch at the top of each spec
+session. The session prompts for it; it can't be automated, because
+the settings file pins effort per model and both seats are the same
+model. Everything else resolves from `.claude/settings.json`, the
+agent frontmatter, and the orchestrator's overrides. Both session
+boundaries are new sessions, not `/clear`: `/clear` resets context
+but keeps the session's settings, which would leave implementation at
+high effort after the spec session, and would skip the next spec
+session's opening prompt. `/clear` has no place in the workflow;
 `/compact` is the tool for an implementation session that grows long.
 
-**Fable's footprint per spec** is the spec session (the conversation
-and the handful of turns that dispatch planning), one planner run,
-one sign-off (plus at most one re-review), and any decision reviews. Everything that edits code runs on Opus. Everything that has
-a turn count runs on Opus 4.8.
+**Fable's footprint per spec**, under experiment 1, is the spec
+session (the conversation and the handful of turns that dispatch
+planning), one planner run, one sign-off (plus at most one
+re-review), any decision reviews — and the whole implementation
+session, at medium. Everything that edits code runs on Opus. The
+implementation session is the part the experiment measures: it is
+where the turns are, and on Fable 5.1 those re-sends bill at the
+cache-read rate.
 
 ## Principles worth generalizing
 

@@ -53,8 +53,8 @@ A project starts in chat, at the top tier: the idea, the constitution
 spec, plan, and tasks — nothing has a codebase yet. From then on,
 Claude Code sessions in the project open on the session tier at
 medium effort, automatically. Each later spec is a conversation in a
-Claude Code session of its own, switched to the top tier by the person
-(the only manual model choice in the workflow); once approved, that
+Claude Code session of its own, raised to high effort by the person
+(the only manual choice in the workflow); once approved, that
 same session dispatches the planner and the sign-off at the top tier,
 then hands off to an implementation session on the session tier that
 builds task by task through implementation-tier implementers and
@@ -64,11 +64,12 @@ phase, and ending at the merge. Two session boundaries per spec. The full table 
 runs, on which model, who's talking — is "The flow at a glance" in
 `SKILL.md`.
 
-## Model tiers, and why the orchestrator isn't the top one
+## Model tiers, and the experiment on the orchestrator's seat
 
 Three roles, three tiers. The names are the current models; the roles
 are what the skill actually fixes, and a project's `CLAUDE.md` names
-the models once.
+the models once. This branch is experiment 1: the session tier runs
+the top tier's model at medium effort.
 
 ```mermaid
 flowchart LR
@@ -83,10 +84,10 @@ flowchart LR
         IMP["sdd-implementer"]
         REV["Phase and per-task reviews, pre-merge sweep"]
     end
-    subgraph sess["Session tier — Opus 4.8, medium: orchestrates"]
+    subgraph sess["Session tier — Fable 5.1, medium: orchestrates"]
         ORC["Orchestrating session"]
     end
-    PERSON <-->|"own session, switched to Fable"| SPEC
+    PERSON <-->|"own session, raised to high effort"| SPEC
     ORC -->|"planning bundle, once per spec"| PLAN
     ORC -->|"drafts"| SIGN
     ORC -->|"decision bundle, non-routine task"| DEC
@@ -102,10 +103,11 @@ decisions are concentrated, not where the turns are.** A Claude Code
 session re-sends its entire context on every turn, and on measured
 projects those re-sends were about 97% of all tokens. The
 orchestrating session is the longest-lived context in the workflow
-and takes the most turns, so whatever model sits there pays its rate
-on everything, constantly. The planner, the sign-off, and a decision
-review are the opposite shape: short-lived, dense with judgment. So
-the top tier runs inside those dispatches and nowhere else.
+and takes the most turns, so whatever model sits there pays its
+cache-read rate on everything, constantly. The planner, the sign-off,
+and a decision review are the opposite shape: short-lived, dense with
+judgment. So the top tier at high effort runs inside those dispatches,
+and the session seat is priced by cache reads.
 
 That only works if the orchestrator genuinely has no judgment calls
 left. Every kind it could face has a defined route away from it:
@@ -121,22 +123,23 @@ left. Every kind it could face has a defined route away from it:
 
 What remains for the session is procedure, whose mistakes are cheap
 and self-revealing (a bad bundle fails verification and costs one
-re-dispatch) and don't compound. That bounded cost is traded against
-a tier premium on every turn. Medium effort is the same reasoning
-applied to behavior: high effort makes a session investigate before
-acting, and everything a hands-off orchestrator reads inflates every
-later re-send.
+re-dispatch) and don't compound. Medium effort is the behavioral half
+of that: high effort makes a session investigate before acting, and
+everything a hands-off orchestrator reads inflates every later
+re-send.
 
-Which model fills the session seat is the person's choice, within
-one constraint: not the top tier. It's the one seat whose prose the
-person reads — the pause report — so readability counts there and
-nowhere else. The current pick is Opus 4.8, a previous-generation
-model at the implementation tier's rate, chosen because its reports
-read most clearly to the person running these projects. The skill
-pairs that with a plain-language rule for everything the person sees,
-under any model, and with a continuation prompt at every
-session-ending pause, so that each session boundary costs a paste rather
-than a reconstruction.
+Which model fills the session seat used to be constrained to "not
+the top tier", on the assumption that the top tier charged a premium
+on every re-send. Fable 5.1's cache reads bill at half the Opus rate,
+which makes the seat's per-token cost about equal on either model.
+Experiment 1, this branch, runs the session on Fable 5.1 at medium
+for one spec to measure what price doesn't settle: the draw on
+Fable's separate allowance, and whether its pause reports — the one
+seat whose prose the person reads — read as clearly as Opus 4.8's
+did. The skill pairs that with a plain-language rule for everything
+the person sees, under any model, and with a continuation prompt at
+every session-ending pause, so that each session boundary costs a
+paste rather than a reconstruction.
 
 The full decision record — what was measured, what was tried first,
 and what evidence would change each choice — is

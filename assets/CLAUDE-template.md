@@ -76,13 +76,16 @@ after every task the planner marked `review: per-task`.
 names as models change; the roles don't. -->
 
 - **Tiers by name**: top tier `fable`; implementation tier `opus`;
-  session tier `claude-opus-4-8` (the full ID — a previous-generation
-  model has no short alias). These three names are the only place a
-  model is spelled out; everything below refers to the roles.
+  session tier `fable` at medium effort (experiment 1 — the top and
+  session tiers are the same model at different effort; the fallback
+  session model is `claude-opus-4-8`, the full ID, since a
+  previous-generation model has no short alias). These names are the
+  only place a model is spelled out; everything below refers to the
+  roles.
 - **The session runs at the session tier, at medium effort**, set in
   this repo's `.claude/settings.json` — written at project setup from
   the skill's `assets/settings-template.json` (`"model":
-  "claude-opus-4-8"`, `"effortLevel": "medium"`, and a level under
+  "claude-fable-5-1"`, `"effortLevel": "medium"`, and a level under
   `"modelSettings"` for each tier's full model ID). If that file is missing or lacks these
   keys, recreate it from the template and commit it before dispatching
   anything; nobody creates it by hand. Project settings outrank user
@@ -94,10 +97,13 @@ names as models change; the roles don't. -->
   bookkeeping turns and re-sends its whole context on each one — the
   dominant cost of the workflow — and it makes no design decisions: it
   assembles bundles, dispatches, verifies, commits, and reports. The
-  session tier is the person's choice — it is the one seat whose
-  prose they read — and it never needs the top tier. If it drops the
-  protocol (a skipped review, a stale `tasks.md` edit, a task done by
-  hand), the first fix is high effort, one line in the same file.
+  role never needs the top tier; it sits on the top tier's model
+  under experiment 1 because Fable 5.1's cache-read rate makes the
+  seat's re-sends cost about what they would on Opus, and this spec
+  measures the allowance draw and the readability of the reports.
+  If it drops the protocol (a skipped review, a stale `tasks.md`
+  edit, a task done by hand), the first fix is high effort, one line
+  in the same file.
 - **The session tier never resolves a design question.** When triage
   finds a task that isn't routine, the session frames the question in
   Plan Mode — so nothing is touched meanwhile — and dispatches the
@@ -138,13 +144,12 @@ names as models change; the roles don't. -->
   ends when `plan.md` and `tasks.md` are final, with a new session
   (not `/clear`, which keeps the model) whose opening prompt is the
   spec session's last message. A session in this repo opens at the
-  session tier, so a spec session states its model first and, if it
-  isn't the top tier, asks the person to switch to the top tier for
-  this session — the model selector in the app, or `/model fable` —
-  before continuing. `.claude/settings.json` pins effort per model, so
-  picking the top tier brings high effort with it and the next session
-  still opens at the session tier. (The project's very first spec,
-  with no codebase yet, happened in chat.)
+  session tier — the top tier's model at medium — so a spec session
+  states its model and effort first (`/effort status`) and asks the
+  person to raise effort to high for this session (`/effort high`)
+  before continuing. The next session opens at medium again from
+  `.claude/settings.json`. (The project's very first spec, with no
+  codebase yet, happened in chat.)
 - **The `skeptical-reviewer` runs at the implementation tier by
   default** (its definition says `opus`) for per-phase reviews, the
   per-task reviews the planner marks, and the pre-merge sweep. Each
@@ -181,7 +186,7 @@ names as models change; the roles don't. -->
   the person is stopping at — the report's last item is the exact
   prompt to paste there, in its own fenced block. It names the spec directory,
   the files to read, where to resume, the involvement level, the
-  pause cadence, and any model switch the next session needs. Write
+  pause cadence, and any effort switch the next session needs. Write
   anything the next session needs to a file first; the prompt points
   at files. If nothing can proceed until the person decides
   something, say so instead.
@@ -190,8 +195,11 @@ names as models change; the roles don't. -->
   saved is one fewer re-send of the whole context.
 - **Fallback**: if the top tier's usage budget runs out, dispatch the
   planner and sign-off at the implementation tier for the rest of the
-  window (drop the override; both definitions default to `opus`).
-  Nothing else changes; the tier log records what ran.
+  window (drop the override; both definitions default to `opus`), and
+  switch the session itself to `claude-opus-4-8` mid-session
+  (`/model claude-opus-4-8` — one cache re-write, then continue).
+  Nothing else changes; the tier log records what ran and when the
+  switch happened, which is a result of experiment 1 in itself.
 - **Escape hatch**: two failed verifications on one task, or a "stopped
   on a judgment call" the orchestrator considers well-specified, and
   the orchestrator does that task itself, noting the

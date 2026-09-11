@@ -154,7 +154,7 @@ Once shipped code is what plans extend (see the skill's authorship
 section), the session doesn't draft `plan.md` and `tasks.md` itself —
 the spec session dispatches `sdd-planner`, once per spec, with a
 per-call override to the top tier named in `CLAUDE.md` (explicit, so
-the dispatch lands there whether or not the person made the switch).
+the dispatch lands there whatever the session itself is running on).
 The exploration a plan needs is the expensive part of planning; it
 belongs in a discardable context bounded by a planning bundle, not in
 the session that then carries it through every sign-off round:
